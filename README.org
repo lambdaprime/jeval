@@ -1,0 +1,107 @@
+
+*jeval* - command line Java code evaluator. It binds all standard streams to support piping and reading from stdin.
+
+lambdaprime <id.blackmesa@gmail.com>
+
+* Usage
+
+java -jar jeval.jar <JAVA_SNIPPET>
+
+If you are entering more than one expression in JAVA_SNIPPET please surround JAVA_SNIPPET with "{}". See examples for details. 
+
+** Predefined variables
+
+BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
+
+** Default imports
+
+#+BEGIN_EXAMPLE
+java.util.stream.IntStream.*
+java.util.stream.Collectors.*
+java.lang.System.*
+java.nio.file.Files.*
+java.lang.Math.*
+
+java.util.*
+java.util.stream.*
+java.io.*
+java.nio.*
+java.nio.file.*
+javax.xml.parsers.*
+javax.xml.xpath.*
+java.net.*
+org.w3c.dom.*
+#+END_EXAMPLE
+
+* Options
+
+none
+
+* Examples
+
+- For convinience of using *jeval* you can define an alias:
+
+#+BEGIN_EXAMPLE
+$ alias jeval="~/jdk-9/bin/java -jar jeval.jar"
+#+END_EXAMPLE
+
+- Say hello to the world:
+
+#+BEGIN_EXAMPLE
+$ jeval "out.println(\"Hello world\")"
+Hello world
+#+END_EXAMPLE
+
+- Print sequence of numbers:
+
+#+BEGIN_EXAMPLE
+$ jeval "range(1,10).forEach(out::println)"
+1
+2
+3
+4
+5
+6
+7
+8
+9
+#+END_EXAMPLE
+
+- Read XML and print value of the element using its XPath:
+
+#+BEGIN_EXAMPLE
+$ jeval "{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(\"/home/id/workspace/n.xml\")); out.println(XPathFactory.newInstance().newXPath().evaluate(\"//note/to\", d));}"
+Tove
+#+END_EXAMPLE
+
+- Return integer in binary format:
+
+#+BEGIN_EXAMPLE
+$ jeval "Integer.toBinaryString(new Scanner(in).nextInt())"
+14
+"1110"
+#+END_EXAMPLE
+
+- or using pipe
+
+#+BEGIN_EXAMPLE
+$ echo 14 | jeval "Integer.toBinaryString(new Scanner(in).nextInt())"
+"1110"
+#+END_EXAMPLE
+
+- Create temporary file and return its name
+
+#+BEGIN_EXAMPLE
+$ jeval "Files.createTempFile(null, \"tmp\")"
+/tmp/11873450107364399793tmp
+#+END_EXAMPLE
+
+- Join lines using "," as delimeter
+
+#+BEGIN_EXAMPLE
+$ jeval "stdin.lines().collect(joining(\",\"))"
+ab
+cd
+ef
+"ab,cd,ef"
+#+END_EXAMPLE
