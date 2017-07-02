@@ -1,5 +1,5 @@
 /* 
- * jeval - java evaluator
+ * jeval - java code evaluator
  *
  * This source file is a part of jeval command line program.
  * Description for this  project/command/program can be found in README.org
@@ -29,6 +29,8 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -44,6 +46,7 @@ public class Main {
 
     private static boolean isError = false;
     private static JShell jshell;
+    private static boolean isScript;
     
     @SuppressWarnings("resource")
     static void usage() throws IOException {
@@ -57,18 +60,20 @@ public class Main {
         Throwable ex = ev.exception();
         if (ex != null) {
             concat(of(ex, ex.getCause()), Arrays.stream(ex.getSuppressed()))
+                .filter(e -> e != null)
                 .forEach(Throwable::printStackTrace);
         }
         switch (ev.status()) {
         case VALID:
             if (ev.value() != null)
-                out.print(ev.value());
+                if (!isScript || !ev.isSignatureChange())
+                    out.print(ev.value());
             break;
         case REJECTED:
             isError = true;
             jshell.diagnostics(ev.snippet())
-                .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
-                .forEach(err::println);;
+                 .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
+                 .forEach(err::println);
             break;
         default:
             break;
@@ -76,7 +81,7 @@ public class Main {
     }
     
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
-        if (args.length != 1) {
+        if (args.length < 1) {
             usage();
             exit(1);
         }
@@ -84,8 +89,9 @@ public class Main {
             .out(out)
             .in(in)
             .err(err)
+            .compilerOptions("-g:none","-implicit:none", "-proc:none")
             .build();
-
+        
         jshell.eval("import static java.util.stream.IntStream.*;");
         jshell.eval("import static java.util.stream.Collectors.*;");
         jshell.eval("import static java.lang.System.*;");
@@ -106,8 +112,16 @@ public class Main {
 
         jshell.onSnippetEvent(Main::onEvent);
         
-        jshell.eval(args[0]);
-
+        if ("-e".equals(args[0]))
+            jshell.eval(args[1]);
+        else {
+            isScript = true;
+            JshExecutor jshExec = new JshExecutor(jshell);
+            Files.readAllLines(Paths.get(args[0]))
+                .stream()
+                .forEach(jshExec::add);
+        }
+        
         exit(isError? 1: 0);
     }
 

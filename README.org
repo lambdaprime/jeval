@@ -5,9 +5,13 @@ lambdaprime <id.blackmesa@gmail.com>
 
 * Usage
 
-java -jar jeval.jar <JAVA_SNIPPET>
+java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ]
 
-If you are entering more than one expression in JAVA_SNIPPET please surround JAVA_SNIPPET with "{}". See examples for details. 
+Where: 
+
+JAVA_SCRIPT - jshell script file to be executed
+
+JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". See examples for details. 
 
 ** Predefined variables
 
@@ -33,29 +37,28 @@ java.net.*
 org.w3c.dom.*
 #+END_EXAMPLE
 
-* Options
-
-none
 
 * Examples
 
-- For convinience of using *jeval* you can define an alias:
+For convenience of using *jeval* you can define an alias:
 
 #+BEGIN_EXAMPLE
-$ alias jeval="~/jdk-9/bin/java -jar jeval.jar"
+$ alias jeval="~/jdk-9/bin/java -Xmn64m -Xms128m -Xmx512m -Xss1024k -XX:+UseParallelGC -Xnoclassgc -Xshare:off -noverify -jar jeval.jar"
 #+END_EXAMPLE
+
+Passing arguments above to JVM will speed-up *jeval* startup time.
 
 - Say hello to the world:
 
 #+BEGIN_EXAMPLE
-$ jeval "out.println(\"Hello world\")"
+$ jeval -e 'out.println("Hello world")'
 Hello world
 #+END_EXAMPLE
 
 - Print sequence of numbers:
 
 #+BEGIN_EXAMPLE
-$ jeval "range(1,10).forEach(out::println)"
+$ jeval -e "range(1,10).forEach(out::println)"
 1
 2
 3
@@ -70,14 +73,14 @@ $ jeval "range(1,10).forEach(out::println)"
 - Read XML and print value of the element using its XPath:
 
 #+BEGIN_EXAMPLE
-$ jeval "{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(\"/home/id/workspace/n.xml\")); out.println(XPathFactory.newInstance().newXPath().evaluate(\"//note/to\", d));}"
+$ jeval -e '{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/home/id/workspace/n.xml")); out.println(XPathFactory.newInstance().newXPath().evaluate("//note/to", d));}'
 Tove
 #+END_EXAMPLE
 
 - Return integer in binary format:
 
 #+BEGIN_EXAMPLE
-$ jeval "Integer.toBinaryString(new Scanner(in).nextInt())"
+$ jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
 14
 "1110"
 #+END_EXAMPLE
@@ -85,23 +88,24 @@ $ jeval "Integer.toBinaryString(new Scanner(in).nextInt())"
 - or using pipe
 
 #+BEGIN_EXAMPLE
-$ echo 14 | jeval "Integer.toBinaryString(new Scanner(in).nextInt())"
+$ echo 14 | jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
 "1110"
 #+END_EXAMPLE
 
 - Create temporary file and return its name
 
 #+BEGIN_EXAMPLE
-$ jeval "Files.createTempFile(null, \"tmp\")"
+$ jeval -e 'Files.createTempFile(null, "tmp")'
 /tmp/11873450107364399793tmp
 #+END_EXAMPLE
 
 - Join lines using "," as delimeter
 
 #+BEGIN_EXAMPLE
-$ jeval "stdin.lines().collect(joining(\",\"))"
+$ jeval -e 'stdin.lines().collect(joining(","))'
 ab
 cd
 ef
 "ab,cd,ef"
 #+END_EXAMPLE
+
