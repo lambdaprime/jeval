@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.function.Predicate;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -71,6 +72,7 @@ public class Main {
             break;
         case REJECTED:
             isError = true;
+            err.println("Rejected snippet: " + ev.snippet().source());
             jshell.diagnostics(ev.snippet())
                  .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
                  .forEach(err::println);
@@ -97,6 +99,8 @@ public class Main {
         jshell.eval("import static java.lang.System.*;");
         jshell.eval("import static java.nio.file.Files.*;");
         jshell.eval("import static java.lang.Math.*;");
+        jshell.eval("import javax.script.*;");
+        jshell.eval("import jdk.nashorn.api.scripting.*;");
         
         jshell.eval("import java.util.*;");
         jshell.eval("import java.util.stream.*;");
@@ -112,15 +116,18 @@ public class Main {
 
         jshell.onSnippetEvent(Main::onEvent);
         
-        if ("-e".equals(args[0]))
-            jshell.eval(args[1]);
+        JshExecutor jshExec = new JshExecutor(jshell);
+        if ("-e".equals(args[0])) {
+            jshExec.onNext(args[1]);
+        }
         else {
             isScript = true;
-            JshExecutor jshExec = new JshExecutor(jshell);
             Files.readAllLines(Paths.get(args[0]))
                 .stream()
-                .forEach(jshExec::add);
+                .filter(Predicate.isEqual("").negate())
+                .forEach(jshExec::onNext);
         }
+        jshExec.onComplete();
         
         exit(isError? 1: 0);
     }

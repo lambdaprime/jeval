@@ -15,7 +15,9 @@ JAVA_SNIPPET - Java expression. If you are entering more than one expression ple
 
 ** Predefined variables
 
+#+BEGIN_EXAMPLE
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
+#+END_EXAMPLE
 
 ** Default imports
 
@@ -25,6 +27,8 @@ java.util.stream.Collectors.*
 java.lang.System.*
 java.nio.file.Files.*
 java.lang.Math.*
+javax.script.*
+jdk.nashorn.api.scripting.*
 
 java.util.*
 java.util.stream.*
@@ -109,3 +113,26 @@ ef
 "ab,cd,ef"
 #+END_EXAMPLE
 
+- execute JavaScript snippet which will read JSON and return value of specified parameter
+
+#+BEGIN_EXAMPLE
+$ echo '{"menu":123}' | jeval -e 'new ScriptEngineManager().getEngineByName("nashorn").eval("var v = " + stdin.lines().collect(joining("\n")) + "; v[\"menu\"]");' 
+#+END_EXAMPLE
+
+- use "document-here" construction in Java script files
+
+#+BEGIN_EXAMPLE
+String json = <<EOF
+{
+  "menu": {
+    "id": "1",
+    "value": "File",
+    "menuitem": [
+      {"value": "2", "onclick": "CreateNewDoc()"},
+      {"value": "3", "onclick": "OpenDoc()"},
+      {"value": "4", "onclick": "CloseDoc()"}
+    ]
+  }
+}
+EOF;
+#+END_EXAMPLE
