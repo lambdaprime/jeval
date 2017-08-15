@@ -57,12 +57,17 @@ public class Main {
             System.out.println(scanner.next());
     }
 
+    static void printException(Throwable ex) {
+        concat(of(ex, ex.getCause()), Arrays.stream(ex.getSuppressed()))
+            .filter(e -> e != null)
+            .forEach(Throwable::printStackTrace);
+    }
+    
     static void onEvent(SnippetEvent ev) {
         Throwable ex = ev.exception();
         if (ex != null) {
-            concat(of(ex, ex.getCause()), Arrays.stream(ex.getSuppressed()))
-                .filter(e -> e != null)
-                .forEach(Throwable::printStackTrace);
+            isError = true;
+            printException(ex);
         }
         switch (ev.status()) {
         case VALID:
@@ -87,10 +92,12 @@ public class Main {
             usage();
             exit(1);
         }
+        
         jshell = JShell.builder()
             .out(out)
             .in(in)
             .err(err)
+            .executionEngine("local")
             .compilerOptions("-g:none","-implicit:none", "-proc:none")
             .build();
         
@@ -115,19 +122,27 @@ public class Main {
         jshell.eval("BufferedReader stdin = new BufferedReader(new InputStreamReader(in));");
 
         jshell.onSnippetEvent(Main::onEvent);
-        
+
         JshExecutor jshExec = new JshExecutor(jshell);
-        if ("-e".equals(args[0])) {
-            jshExec.onNext(args[1]);
-        }
-        else {
-            isScript = true;
-            Files.readAllLines(Paths.get(args[0]))
-                .stream()
-                .filter(Predicate.isEqual("").negate())
-                .forEach(jshExec::onNext);
-        }
-        jshExec.onComplete();
+        try
+        {
+            if ("-e".equals(args[0])) {
+                jshExec.onNext(args[1]);
+            }
+            else {
+                isScript = true;
+                Files.readAllLines(Paths.get(args[0]))
+                    .stream()
+                    .filter(Predicate.isEqual("").negate())
+                    .filter(l -> !isError)
+                    .forEach(jshExec::onNext);
+            }
+            jshExec.onComplete();
+        } catch (Throwable ex) {
+            printException(ex);
+        } 
+
+        jshell.close();
         
         exit(isError? 1: 0);
     }
