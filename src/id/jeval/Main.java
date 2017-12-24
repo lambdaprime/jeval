@@ -57,6 +57,15 @@ public class Main {
             System.out.println(scanner.next());
     }
 
+    @SuppressWarnings("resource")
+    static void preloader(JshExecutor jshExec) throws IOException {
+        isScript = true;
+        Scanner scanner = new Scanner(Main.class.getResource("preloader.jsh").openStream())
+                .useDelimiter("\n");
+        while (scanner.hasNext())
+            jshExec.onNext(scanner.next());
+    }
+    
     static void printException(Throwable ex) {
         concat(of(ex, ex.getCause()), Arrays.stream(ex.getSuppressed()))
             .filter(e -> e != null)
@@ -101,32 +110,15 @@ public class Main {
             .compilerOptions("-g:none","-implicit:none", "-proc:none")
             .build();
         
-        jshell.eval("import static java.util.stream.IntStream.*;");
-        jshell.eval("import static java.util.stream.Collectors.*;");
-        jshell.eval("import static java.lang.System.*;");
-        jshell.eval("import static java.nio.file.Files.*;");
-        jshell.eval("import static java.lang.Math.*;");
-        jshell.eval("import javax.script.*;");
-        jshell.eval("import jdk.nashorn.api.scripting.*;");
-        
-        jshell.eval("import java.util.*;");
-        jshell.eval("import java.util.stream.*;");
-        jshell.eval("import java.io.*;");
-        jshell.eval("import java.nio.*;");
-        jshell.eval("import java.nio.file.*;");
-        jshell.eval("import javax.xml.parsers.*;");
-        jshell.eval("import javax.xml.xpath.*;");
-        jshell.eval("import java.net.*;");
-        jshell.eval("import org.w3c.dom.*;");
-        
-        jshell.eval("BufferedReader stdin = new BufferedReader(new InputStreamReader(in));");
-
         jshell.onSnippetEvent(Main::onEvent);
 
         JshExecutor jshExec = new JshExecutor(jshell);
+        preloader(jshExec);
+        
         try
         {
             if ("-e".equals(args[0])) {
+                isScript = false;
                 jshExec.onNext(args[1]);
             }
             else {

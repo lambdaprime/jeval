@@ -19,11 +19,16 @@ JAVA_SNIPPET - Java expression. If you are entering more than one expression ple
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 #+END_EXAMPLE
 
+** Predefined classes
+
+- Netcat -- implements netcat operations listen and connect
+
 ** Default imports
 
 #+BEGIN_EXAMPLE
 java.util.stream.IntStream.*
 java.util.stream.Collectors.*
+
 java.lang.System.*
 java.nio.file.Files.*
 java.lang.Math.*
@@ -32,6 +37,7 @@ jdk.nashorn.api.scripting.*
 
 java.util.*
 java.util.stream.*
+java.util.concurrent.*;
 java.io.*
 java.nio.*
 java.nio.file.*
@@ -136,3 +142,10 @@ String json = <<EOF
 }
 EOF;
 #+END_EXAMPLE
+
+- use Netcat and listen for incoming connection on port 31337
+
+#+BEGIN_EXAMPLE
+$ jeval -e "Netcat.listen(31337)"
+#+END_EXAMPLE
+
