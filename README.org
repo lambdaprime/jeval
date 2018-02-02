@@ -5,13 +5,15 @@ lambdaprime <id.blackmesa@gmail.com>
 
 * Usage
 
-java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ]
+java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
 
 Where: 
 
 JAVA_SCRIPT - jshell script file to be executed
 
 JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". See examples for details. 
+
+ARGS - arguments which will be passed to jshell through global variable args
 
 ** Predefined variables
 
@@ -21,7 +23,14 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 
 ** Predefined classes
 
-- Netcat -- implements netcat operations listen and connect
+*** Netcat
+
+Implements netcat operations:
+
+- Netcat.listen(int port)
+- Netcat.connect(String host, int port)
+    
+All input/output goes through stdin/stdout.
 
 ** Default imports
 
@@ -147,5 +156,11 @@ EOF;
 
 #+BEGIN_EXAMPLE
 $ jeval -e "Netcat.listen(31337)"
+#+END_EXAMPLE
+
+- use commandline arguments
+
+#+BEGIN_EXAMPLE
+$ jeval -e 'out.println("args " + args[1])' "Hello world"
 #+END_EXAMPLE
 

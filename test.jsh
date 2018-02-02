@@ -101,3 +101,5 @@ HelloWorld.main(null);
 
 rangeClosed(10, 10)
     .forEach(out::println);
+    
+out.println("args: " + Arrays.toString(args));
