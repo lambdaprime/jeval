@@ -103,3 +103,24 @@ rangeClosed(10, 10)
     .forEach(out::println);
     
 out.println("args: " + Arrays.toString(args));
+
+Runnable r = () -> {
+    try {
+        Thread.sleep(100);
+    } catch (InterruptedException e) {}
+};
+
+long l = new Microprofiler().measureRealTime(r);
+System.out.println(l >= 100);
+
+l = new Microprofiler().measureUserCpuTime(r);
+System.out.println(l == 0);
+
+l = new Microprofiler().measureUserCpuTime(() -> {
+    String s = "";
+    for (int i = 0; i < 100000; i++) {
+        s += "x";
+    }
+    System.out.println(s);
+});
+System.out.println(l > 0);

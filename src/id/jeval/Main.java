@@ -25,6 +25,7 @@ import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.in;
 import static java.lang.System.out;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -35,7 +36,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,7 +49,9 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.xml.sax.SAXException;
 
+import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
+import jdk.jshell.JShellException;
 import jdk.jshell.SnippetEvent;
 
 public class Main {
@@ -53,6 +59,7 @@ public class Main {
     private static boolean isError = false;
     private static JShell jshell;
     private static boolean isScript;
+    private static JshExecutor jshExec;
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
@@ -71,7 +78,7 @@ public class Main {
             jshExec.onNext(scanner.next());
     }
     
-    private static List<String> split(String s) {
+    private static List<String> splitByArgs(String s) {
         String regex = "\"([^\"]*)\"|(\\S+)";
         Matcher m = Pattern.compile(regex).matcher(s);
         List<String> r = new ArrayList<>();
@@ -85,20 +92,24 @@ public class Main {
     }
     
     private static void printException(Throwable ex) {
+        if (ex instanceof EvalException) {
+            EvalException evx = (EvalException)ex;
+            out.format("%s %s\n", evx.getExceptionClassName(), evx.getMessage());
+        }
         concat(of(ex, ex.getCause()), Arrays.stream(ex.getSuppressed()))
             .filter(e -> e != null)
             .forEach(Throwable::printStackTrace);
     }
     
     private static void defineArgs(JshExecutor jshExec, String args) {
-        jshExec.onNext(String.format("String[] args = {%s};", 
-            split(args).stream()
+        jshExec.onNext(String.format("args = new String[]{%s};", 
+            splitByArgs(args).stream()
                 .map(s -> "\"" + s + "\"")
                 .collect(joining(", "))));
     }
     
     private static void onEvent(SnippetEvent ev) {
-        Throwable ex = ev.exception();
+        JShellException ex = ev.exception();
         if (ex != null) {
             isError = true;
             printException(ex);
@@ -120,6 +131,35 @@ public class Main {
             break;
         }
     }
+
+    private static void runScript(String file) throws IOException {
+        isScript = true;
+        Files.readAllLines(Paths.get(file))
+            .stream()
+            .filter(Predicate.isEqual("").negate())
+            .filter(l -> !isError)
+            .forEach(jshExec::onNext);
+    }
+    
+    private static void runSnippet(String snippet) {
+        isScript = false;
+        jshExec.onNext(snippet);
+    }
+    
+    private static <T, E extends Throwable> ThrowingRunnable<E> curry(
+            ThrowingConsumer<T, E> consumer, T v) {
+        return () -> consumer.accept(v);
+    }
+    
+    @FunctionalInterface
+    interface ThrowingRunnable<E extends Throwable> {
+        void run() throws E;
+    }
+    
+    @FunctionalInterface
+    interface ThrowingConsumer<T, E extends Throwable> {
+        void accept(T t) throws E;
+    }
     
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
         if (args.length < 1) {
@@ -137,30 +177,36 @@ public class Main {
         
         jshell.onSnippetEvent(Main::onEvent);
 
-        JshExecutor jshExec = new JshExecutor(jshell);
+        jshExec = new JshExecutor(jshell);
         preloader(jshExec);
+        
+        ThrowingRunnable<Throwable>[] r = new ThrowingRunnable[1];
+        Map<String, Consumer<String>> handlers = Map.of(
+            "-e", snippet -> r[0] = curry(Main::runSnippet, snippet),
+            "-classpath", cp -> stream(cp.split(":"))
+                .forEach(jshell::addToClasspath)
+        );
+        
+        Function<String, Boolean> defaultHandler = arg -> {
+            if (r[0] != null) {
+                defineArgs(jshExec, arg);
+                return false;
+            }
+            r[0] = curry(Main::runScript, arg);
+            return true;
+        };
         
         try
         {
-            if ("-e".equals(args[0])) {
-                if (args.length < 2) {
-                    usage();
-                    exit(1);
-                }
-                if (args.length == 3)
-                    defineArgs(jshExec, args[2]);
-                isScript = false;
-                jshExec.onNext(args[1]);
-            } else {
-                isScript = true;
-                if (args.length == 2)
-                    defineArgs(jshExec, args[1]);
-                Files.readAllLines(Paths.get(args[0]))
-                    .stream()
-                    .filter(Predicate.isEqual("").negate())
-                    .filter(l -> !isError)
-                    .forEach(jshExec::onNext);
-            }
+            new SmartArgs(handlers, defaultHandler).parse(args);
+            if (r[0] == null) throw new Exception();
+        } catch (Exception e) {
+            usage();
+            exit(1);
+        }
+        
+        try {
+            r[0].run();
             jshExec.onComplete();
         } catch (Throwable ex) {
             printException(ex);

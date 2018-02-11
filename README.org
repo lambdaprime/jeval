@@ -21,6 +21,10 @@ ARGS - arguments which will be passed to jshell through global variable args
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 #+END_EXAMPLE
 
+** Predefined functions
+
+sleep(int msec) - sleeps with no exception
+
 ** Predefined classes
 
 *** Netcat
@@ -31,6 +35,20 @@ Implements netcat operations:
 - Netcat.connect(String host, int port)
     
 All input/output goes through stdin/stdout.
+
+*** Microprofiler
+
+- long Microprofiler.measureUserCpuTime(Runnable r)
+
+Measures real CPU execution time in milliseconds and returns it.
+
+- long Microprofiler.measureRealTime(Runnable r)
+
+Measures execution time in milliseconds using wall clock and returns it. It is not precise time since CPU may perform context switch to another thread but the clock will still be ticking.
+
+- long Microprofiler.measureExecutionTime(Runnable r)
+
+Chooses the best available on current JVM way to measure the execution time and returns it in milliseconds.
 
 ** Default imports
 
@@ -164,3 +182,8 @@ $ jeval -e "Netcat.listen(31337)"
 $ jeval -e 'out.println("args " + args[1])' "Hello world"
 #+END_EXAMPLE
 
+- measure execution real time
+
+#+BEGIN_EXAMPLE
+jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
+#+END_EXAMPLE
