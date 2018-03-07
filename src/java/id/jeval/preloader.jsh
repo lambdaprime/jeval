@@ -9,6 +9,7 @@ import jdk.nashorn.api.scripting.*;
 import java.util.*;
 import java.util.stream.*;
 import java.util.concurrent.*;
+import java.util.function.*;
 import java.io.*;
 import java.nio.*;
 import java.nio.file.*;

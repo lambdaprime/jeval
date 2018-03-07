@@ -1,5 +1,5 @@
 
-*jeval* - command line Java code evaluator. It binds all standard streams to support piping and reading from stdin.
+*jeval* - command line Java code evaluator. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts.
 
 lambdaprime <id.blackmesa@gmail.com>
 
@@ -9,11 +9,11 @@ java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
 
 Where: 
 
-JAVA_SCRIPT - jshell script file to be executed
+JAVA_SCRIPT - Java shell script file to be executed. I prefer to save jshell scripts in *.java extension so Eclipse will automatically highlight the syntax in them.
 
-JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". See examples for details. 
+JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". If your snippet contains quotes "" you need to escape them with backslash. In Linux it is enough to enclose the snippet in single quotes ''.
 
-ARGS - arguments which will be passed to jshell through global variable args
+ARGS - arguments which will be passed to the jshell through the global variable "args: String[]". All arguments should be enclosed in the quotes and passed to *jeval* as a single argument. For example if you want to pass to your jshell code two arguments "Hello world" and "jeval" you need to pass them to jeval like "\\"Hello world\\" jeval".
 
 ** Predefined variables
 
@@ -23,7 +23,9 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 
 ** Predefined functions
 
-sleep(int msec) - sleeps with no exception
+- void sleep(int msec)
+
+Sleeps with no exception
 
 ** Predefined classes
 
@@ -65,6 +67,7 @@ jdk.nashorn.api.scripting.*
 java.util.*
 java.util.stream.*
 java.util.concurrent.*;
+java.util.function.*;
 java.io.*
 java.nio.*
 java.nio.file.*
@@ -77,18 +80,10 @@ org.w3c.dom.*
 
 * Examples
 
-For convenience of using *jeval* you can define an alias:
-
-#+BEGIN_EXAMPLE
-$ alias jeval="~/jdk-9/bin/java -Xmn64m -Xms128m -Xmx512m -Xss1024k -XX:+UseParallelGC -Xnoclassgc -Xshare:off -noverify -jar jeval.jar"
-#+END_EXAMPLE
-
-Passing arguments above to JVM will speed-up *jeval* startup time.
-
 - Say hello to the world:
 
 #+BEGIN_EXAMPLE
-$ jeval -e 'out.println("Hello world")'
+$ jeval -e "out.println(\"Hello world\")"
 Hello world
 #+END_EXAMPLE
 
@@ -110,7 +105,7 @@ $ jeval -e "range(1,10).forEach(out::println)"
 - Read XML and print value of the element using its XPath:
 
 #+BEGIN_EXAMPLE
-$ jeval -e '{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/home/id/workspace/n.xml")); out.println(XPathFactory.newInstance().newXPath().evaluate("//note/to", d));}'
+$ jeval -e "{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(\"/home/id/workspace/n.xml\")); out.println(XPathFactory.newInstance().newXPath().evaluate(\"//note/to\", d));}"
 Tove
 #+END_EXAMPLE
 
@@ -132,14 +127,14 @@ $ echo 14 | jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
 - Create temporary file and return its name
 
 #+BEGIN_EXAMPLE
-$ jeval -e 'Files.createTempFile(null, "tmp")'
+$ jeval -e "Files.createTempFile(null, \"tmp\")"
 /tmp/11873450107364399793tmp
 #+END_EXAMPLE
 
 - Join lines using "," as delimeter
 
 #+BEGIN_EXAMPLE
-$ jeval -e 'stdin.lines().collect(joining(","))'
+$ jeval -e "stdin.lines().collect(joining(\",\"))"
 ab
 cd
 ef
@@ -149,7 +144,7 @@ ef
 - execute JavaScript snippet which will read JSON and return value of specified parameter
 
 #+BEGIN_EXAMPLE
-$ echo '{"menu":123}' | jeval -e 'new ScriptEngineManager().getEngineByName("nashorn").eval("var v = " + stdin.lines().collect(joining("\n")) + "; v[\"menu\"]");' 
+$ echo '{"menu":123}' | jeval -e "new ScriptEngineManager().getEngineByName(\"nashorn\").eval(\"var v = \" + stdin.lines().collect(joining(\"\n\")) + \"; v[\\\"menu\\\"]\");"
 #+END_EXAMPLE
 
 - use "document-here" construction in Java script files
@@ -179,7 +174,7 @@ $ jeval -e "Netcat.listen(31337)"
 - use commandline arguments
 
 #+BEGIN_EXAMPLE
-$ jeval -e 'out.println("args " + args[1])' "Hello world"
+$ jeval -e "out.println(\"args \" + args[1])" "Hello world"
 #+END_EXAMPLE
 
 - measure execution real time
