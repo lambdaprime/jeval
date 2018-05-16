@@ -3,6 +3,14 @@
 
 lambdaprime <id.blackmesa@gmail.com>
 
+* Download
+
+You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/release/jeval.zip
+
+* Requirements
+
+Java 9
+
 * Usage
 
 java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
@@ -60,6 +68,7 @@ java.util.stream.Collectors.*
 
 java.lang.System.*
 java.nio.file.Files.*
+java.util.Arrays.*;
 java.lang.Math.*
 javax.script.*
 jdk.nashorn.api.scripting.*
@@ -180,5 +189,5 @@ $ jeval -e "out.println(\"args \" + args[1])" "Hello world"
 - measure execution real time
 
 #+BEGIN_EXAMPLE
-jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
+$ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
 #+END_EXAMPLE
