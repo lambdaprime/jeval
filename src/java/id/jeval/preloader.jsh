@@ -108,3 +108,19 @@ void sleep(int msec) {
 }
 
 String[] args = new String[0];
+
+void printf(String s) {
+    out.println(s);
+}
+
+void printf(int s) {
+    out.println(s);
+}
+
+String read() throws Exception {
+    return stdin.readLine();
+}
+
+int readInt() {
+    return new Scanner(System.in).nextInt();
+}
