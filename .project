@@ -10,15 +10,14 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.buildship.core.gradleprojectbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>src/java/id/jeval/README.md</name>
-			<type>1</type>
-			<locationURI>PROJECT_LOC/README.md</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

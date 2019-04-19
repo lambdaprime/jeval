@@ -63,7 +63,7 @@ public class Main {
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
-        Scanner scanner = new Scanner(Main.class.getResource("README.md").openStream())
+        Scanner scanner = new Scanner(Main.class.getResource("/README.md").openStream())
                 .useDelimiter("\n");
         while (scanner.hasNext())
             System.out.println(scanner.next());
@@ -72,7 +72,7 @@ public class Main {
     @SuppressWarnings("resource")
     private static void preloader(JshExecutor jshExec) throws IOException {
         isScript = true;
-        Scanner scanner = new Scanner(Main.class.getResource("preloader.jsh").openStream())
+        Scanner scanner = new Scanner(Main.class.getResource("/preloader.jsh").openStream())
                 .useDelimiter("\n");
         while (scanner.hasNext())
             jshExec.onNext(scanner.next());

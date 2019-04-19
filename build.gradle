@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+String releaseFileName = "jeval-9.zip"
+String testDir = "$buildDir/test"
+String testSrcDir = "$projectDir/src/test"
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src/resources']
+        }
+    }
+}
+
+jar { 
+    manifest { 
+        attributes 'Main-Class': 'id.jeval.Main'
+    }
+}
+
+task packageDistribution(type: Zip) {
+    archiveFileName = releaseFileName
+    destinationDirectory = file("$projectDir/release")
+    from jar.archiveFile
+    from file("$projectDir/src/jeval")
+    from file("$projectDir/src/jeval.bat")
+}
+
+assemble.dependsOn packageDistribution
+
+// Gradle has no UnZip task so we reuse Copy for that
+task myTest(type: Copy) {
+    mkdir file(testDir)
+    from(zipTree("$projectDir/release/" + packageDistribution.archiveFileName.get()))
+    into testDir
+}
+
+task copyReadme(type: Copy) {
+    from("$projectDir/README.md")
+    into("$projectDir/src/resources")
+}
+
+task myTestFile(type: Exec) {
+    standardInput = System.in
+    commandLine testDir + "/jeval", testSrcDir + "/test.java"
+}
+
+task myTestSnippet(type: Exec) {
+    standardInput = System.in
+    commandLine "sh", testSrcDir + "/test.sh"
+    environment("JEVAL_PATH", testDir)
+}
+
+
+compileJava.dependsOn copyReadme
+test.dependsOn myTest
+test.dependsOn myTestFile
+test.dependsOn myTestSnippet
+myTestFile.mustRunAfter myTest
+myTestSnippet.mustRunAfter myTest
