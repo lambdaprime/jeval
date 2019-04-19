@@ -21,6 +21,15 @@ import org.w3c.dom.*;
         
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
 
+/**
+ * Implements netcat operations:
+ *
+ * - Netcat.listen(int port)
+ * - Netcat.connect(String host, int port)
+ *
+ * All input/output goes through stdin/stdout.
+ *
+ */
 class Netcat {
 
     static void create(Socket s) throws IOException {
@@ -101,6 +110,60 @@ public class Microprofiler {
 
 }
 
+/**
+ * Run shell command and obtain its output as stream of lines.
+ *
+ * Example:
+ * 
+new Exec("curl", "-L", "-G", "http://google.com")
+    .run()
+    .forEach(out::println);
+
+new Exec("cat")
+    .withInput(Stream.of("asdfasd", "fdsgdfg"))
+    .run()
+    .forEach(out::println);
+ *
+ */
+public class Exec {
+
+    private String[] cmd;
+    private Stream<String> input;
+
+    /**
+     * Constructor which accepts the command to run and list of arguments
+     */
+    public Exec(String... cmd) {
+        this.cmd = cmd;
+    }
+
+    public Exec withInput(Stream<String> input) {
+        this.input = input;
+        return this;
+    }
+
+    public Stream<String> run() {
+        ProcessBuilder pb = new ProcessBuilder(cmd)
+                .redirectErrorStream(true);
+        try {
+            Process p = pb.start();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(p.getInputStream​()));
+            if (input != null) {
+                PrintStream ps = new PrintStream(p.getOutputStream(), true);
+                input.forEach(ps::println);
+                ps.close();
+            }
+            return in.lines();
+        } catch (Exception e) {
+            throw new RuntimeException("Encountered error executing command: " + Arrays.toString(cmd), e);
+        }
+    }
+}
+
+/**
+ * Sleeps with no exception
+ */
 void sleep(int msec) {
     try {
         Thread.sleep(msec);
@@ -110,11 +173,7 @@ void sleep(int msec) {
 String[] args = new String[0];
 
 void printf(String s) {
-    out.println(s);
-}
-
-void printf(int s) {
-    out.println(s);
+    out.print(String.format(s));
 }
 
 String read() throws Exception {

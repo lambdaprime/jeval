@@ -1,17 +1,17 @@
 
-*jeval* - command line Java code evaluator. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts.
+**jeval** - command line Java code evaluator. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts.
 
 lambdaprime <id.blackmesa@gmail.com>
 
-* Download
+# Download
 
 You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/release/jeval.zip
 
-* Requirements
+# Requirements
 
 Java 9
 
-* Usage
+# Usage
 
 java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
 
@@ -23,46 +23,9 @@ JAVA_SNIPPET - Java expression. If you are entering more than one expression ple
 
 ARGS - arguments which will be passed to the jshell through the global variable "args: String[]". All arguments should be enclosed in the quotes and passed to *jeval* as a single argument. For example if you want to pass to your jshell code two arguments "Hello world" and "jeval" you need to pass them to jeval like "\\"Hello world\\" jeval".
 
-** Predefined variables
+## Default imports
 
-#+BEGIN_EXAMPLE
-BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
-#+END_EXAMPLE
-
-** Predefined functions
-
-- void sleep(int msec)
-
-Sleeps with no exception
-
-** Predefined classes
-
-*** Netcat
-
-Implements netcat operations:
-
-- Netcat.listen(int port)
-- Netcat.connect(String host, int port)
-    
-All input/output goes through stdin/stdout.
-
-*** Microprofiler
-
-- long Microprofiler.measureUserCpuTime(Runnable r)
-
-Measures real CPU execution time in milliseconds and returns it.
-
-- long Microprofiler.measureRealTime(Runnable r)
-
-Measures execution time in milliseconds using wall clock and returns it. It is not precise time since CPU may perform context switch to another thread but the clock will still be ticking.
-
-- long Microprofiler.measureExecutionTime(Runnable r)
-
-Chooses the best available on current JVM way to measure the execution time and returns it in milliseconds.
-
-** Default imports
-
-#+BEGIN_EXAMPLE
+```java
 java.util.stream.IntStream.*
 java.util.stream.Collectors.*
 
@@ -84,21 +47,73 @@ javax.xml.parsers.*
 javax.xml.xpath.*
 java.net.*
 org.w3c.dom.*
-#+END_EXAMPLE
+```
 
+## Predefined variables
 
-* Examples
+```java
+BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
+```
 
-- Say hello to the world:
+## Predefined functions
 
-#+BEGIN_EXAMPLE
+- sleep(int msec)
+
+Sleeps with no exception
+
+## Predefined classes
+
+### Exec
+
+External commands executor 
+
+- Exec(String... cmd)
+
+  Constructor which accepts the command to run and list of arguments
+  
+- withInput(Stream<String> input)
+
+  Specifies whether Exec needs to pass data to the command's standard input 
+
+- run(): Stream<String>
+
+  Runs the command and returns its output
+
+### Netcat
+
+Implements netcat operations:
+
+- Netcat.listen(int port)
+- Netcat.connect(String host, int port)
+    
+All input/output goes through stdin/stdout.
+
+### Microprofiler
+
+- Microprofiler.measureUserCpuTime(Runnable r): long
+  
+  Measures real CPU execution time in milliseconds and returns it.
+
+- Microprofiler.measureRealTime(Runnable r): long
+
+  Measures execution time in milliseconds using wall clock and returns it. It is not precise time since CPU may perform context switch to another thread but the clock will still be ticking.
+
+- Microprofiler.measureExecutionTime(Runnable r): long
+
+  Chooses the best available on current JVM way to measure the execution time and returns it in milliseconds.
+
+# Examples
+
+## Say hello to the world:
+
+```bash
 $ jeval -e "out.println(\"Hello world\")"
 Hello world
-#+END_EXAMPLE
+```
 
-- Print sequence of numbers:
+## Print sequence of numbers:
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "range(1,10).forEach(out::println)"
 1
 2
@@ -109,56 +124,56 @@ $ jeval -e "range(1,10).forEach(out::println)"
 7
 8
 9
-#+END_EXAMPLE
+```
 
-- Read XML and print value of the element using its XPath:
+## Read XML and print value of the element using its XPath:
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(\"/home/id/workspace/n.xml\")); out.println(XPathFactory.newInstance().newXPath().evaluate(\"//note/to\", d));}"
 Tove
-#+END_EXAMPLE
+```
 
-- Return integer in binary format:
+## Return integer in binary format:
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
 14
 "1110"
-#+END_EXAMPLE
+```
 
-- or using pipe
+Or using pipe
 
-#+BEGIN_EXAMPLE
+```bash
 $ echo 14 | jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
 "1110"
-#+END_EXAMPLE
+```
 
-- Create temporary file and return its name
+## Create temporary file and return its name
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "Files.createTempFile(null, \"tmp\")"
 /tmp/11873450107364399793tmp
-#+END_EXAMPLE
+```
 
-- Join lines using "," as delimeter
+## Join lines using "," as a delimeter
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "stdin.lines().collect(joining(\",\"))"
 ab
 cd
 ef
 "ab,cd,ef"
-#+END_EXAMPLE
+```
 
-- execute JavaScript snippet which will read JSON and return value of specified parameter
+## Execute JavaScript snippet which will read JSON and return value of specified parameter
 
-#+BEGIN_EXAMPLE
+```bash
 $ echo '{"menu":123}' | jeval -e "new ScriptEngineManager().getEngineByName(\"nashorn\").eval(\"var v = \" + stdin.lines().collect(joining(\"\n\")) + \"; v[\\\"menu\\\"]\");"
-#+END_EXAMPLE
+```
 
-- use "document-here" construction in Java script files
+## Use "document-here" construction
 
-#+BEGIN_EXAMPLE
+```java
 String json = <<EOF
 {
   "menu": {
@@ -172,22 +187,29 @@ String json = <<EOF
   }
 }
 EOF;
-#+END_EXAMPLE
+```
 
-- use Netcat and listen for incoming connection on port 31337
+## Use Netcat and listen for incoming connection on port 31337
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "Netcat.listen(31337)"
-#+END_EXAMPLE
+```
 
-- use commandline arguments
+## Use commandline arguments
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "out.println(\"args \" + args[1])" "Hello world"
-#+END_EXAMPLE
+```
 
-- measure execution real time
+## Measure execution real time
 
-#+BEGIN_EXAMPLE
+```bash
 $ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
-#+END_EXAMPLE
+```
+## Run command
+
+```java
+new Exec("curl", "-L", "-G", "http://google.com")
+    .run()
+    .forEach(out::println);
+```

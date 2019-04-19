@@ -16,9 +16,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>src/java/id/jeval/README.org</name>
+			<name>src/java/id/jeval/README.md</name>
 			<type>1</type>
-			<locationURI>PROJECT_LOC/README.org</locationURI>
+			<locationURI>PROJECT_LOC/README.md</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
