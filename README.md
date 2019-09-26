@@ -67,11 +67,15 @@ Sleeps with no exception
 
 ### Exec
 
-External commands executor 
+External commands executor.
+
+- Exec(String cmd)
+
+  Constructor which accepts the command to run with the arguments
 
 - Exec(String... cmd)
 
-  Constructor which accepts the command to run and list of arguments
+  Constructor which accepts the command to run and list of arguments. Useful in case you don't want to mask upper level quotes.
   
 - withInput(Stream<String> input)
 
@@ -79,7 +83,7 @@ External commands executor
 
 - run(): Stream<String>
 
-  Runs the command and returns its output
+  Runs the command and returns its output and stderr as a single stream.
 
 ### Netcat
 
@@ -214,4 +218,10 @@ $ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
 new Exec("curl", "-L", "-G", "http://google.com")
     .run()
     .forEach(out::println);
+```
+
+Or
+
+```bash
+jeval -e 'new Exec("curl -L -G http://google.com").run().forEach(out::println)'
 ```

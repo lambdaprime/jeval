@@ -128,6 +128,7 @@ new Exec("cat")
 public class Exec {
 
     private String[] cmd;
+    private boolean singleLine;
     private Stream<String> input;
 
     /**
@@ -137,16 +138,19 @@ public class Exec {
         this.cmd = cmd;
     }
 
+    public Exec(String cmd) {
+        this(new String[] {cmd});
+        singleLine = true;
+    }
+
     public Exec withInput(Stream<String> input) {
         this.input = input;
         return this;
     }
 
     public Stream<String> run() {
-        ProcessBuilder pb = new ProcessBuilder(cmd)
-                .redirectErrorStream(true);
         try {
-            Process p = pb.start();
+            Process p = runProcess();
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(p.getInputStream​()));
             if (input != null) {
@@ -154,10 +158,19 @@ public class Exec {
                 input.forEach(ps::println);
                 ps.close();
             }
-            return in.lines();
+            BufferedReader ein = new BufferedReader(
+                new InputStreamReader(p.getErrorStream()));
+            return Stream.concat(in.lines(), ein.lines());
         } catch (Exception e) {
             throw new RuntimeException("Encountered error executing command: " + Arrays.toString(cmd), e);
         }
+    }
+
+    private Process runProcess() throws IOException {
+        if (singleLine) {
+            return Runtime.getRuntime().exec(cmd[0]);
+        }
+        return new ProcessBuilder(cmd).start();
     }
 }
 

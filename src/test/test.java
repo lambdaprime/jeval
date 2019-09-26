@@ -75,16 +75,20 @@ Runnable r = () -> {
 };
 
 long l = new Microprofiler().measureRealTime(r);
-System.out.println(l >= 100);
+out.println(l >= 100);
 
 l = new Microprofiler().measureUserCpuTime(r);
-System.out.println(l == 0);
+out.println(l == 0);
 
 l = new Microprofiler().measureUserCpuTime(() -> {
     String s = "";
     for (int i = 0; i < 1000; i++) {
         s += "x";
     }
-    System.out.println(s);
+    out.println(s);
 });
-System.out.println(l > 0);
+out.println(l > 0);
+
+new Exec("curl", "-L", "-G", "http://google.com")
+    .run()
+    .forEach(out::println);
