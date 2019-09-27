@@ -92,3 +92,10 @@ out.println(l > 0);
 new Exec("curl", "-L", "-G", "http://google.com")
     .run()
     .forEach(out::println);
+
+Path xmlFile = Paths.get("src/test/test.xml");
+out.println(Xml.query(xmlFile, "//note/to/@test"));
+out.println(Xml.query(xmlFile, "/notes/note/to[@test=\"ggg2\"]"));
+out.println(Xml.query(xmlFile, "/notes/note/to"));
+out.println(Xml.query(xmlFile, "/notes/note[2]"));
+out.println(Xml.query(xmlFile, "/notes/note/to/@test"));

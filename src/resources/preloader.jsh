@@ -18,6 +18,7 @@ import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import java.net.*;
 import org.w3c.dom.*;
+import org.xml.sax.*;
         
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
 
@@ -195,4 +196,121 @@ String read() throws Exception {
 
 int readInt() {
     return new Scanner(System.in).nextInt();
+}
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPathEvaluationResult;
+import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathNodes;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+public class Xml {
+
+    public static List<String> query(Path xml, String xpath) {
+        List<String> out = new ArrayList<>();
+        Consumer<Node> visitor = saveVisitor(out);
+        try {
+            xpath_(new InputSource(new FileInputStream(xml.toFile())), xpath, visitor);
+            return out;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<String> query(String xml, String xpath) {
+        List<String> out = new ArrayList<>();
+        Consumer<Node> visitor = saveVisitor(out);
+        xpath_(new InputSource(new StringReader(xml)), xpath, visitor);
+        return out;
+    }
+
+    public static void replace(Path xml, String xpath, String value) {
+        try {
+            Consumer<Node> visitor = replaceVisitor(value);
+            String str = asString(xpath_(new InputSource(new FileInputStream(xml.toFile())), xpath, visitor));
+            Files.writeString(xml, str, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String replace(String xml, String xpath, String value) {
+        Consumer<Node> visitor = replaceVisitor(value);
+        return asString(xpath_(new InputSource(new StringReader(xml)), xpath, visitor));
+    }
+
+    private static void parseNodeList(NodeList l, Consumer<Node> visitor) {
+        for (int i = 0; i < l.getLength(); i++) {
+            Node n = l.item(i);
+            switch (n.getNodeType()) {
+            case Node.ELEMENT_NODE: {
+                parseNodeList(n.getChildNodes(), visitor);
+                break;
+            }
+            case Node.TEXT_NODE: {
+                String value = n.getNodeValue();
+                if (value.trim().isEmpty()) continue;
+                visitor.accept(n);
+            }}
+        }
+    }
+
+    private static Consumer<Node> saveVisitor(List<String> out) {
+        return n -> {
+            out.add(n.getNodeValue());
+        };
+    }
+
+    private static Consumer<Node> replaceVisitor(String value) {
+        return n -> {
+            n.setNodeValue(value);
+        };
+    }
+
+    private static String asString(Document doc) {
+        try {
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(doc), new StreamResult(writer));
+            return writer.getBuffer().toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static Document xpath_(InputSource src, String xpath, Consumer<Node> visitor) {
+        try {
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src);
+            XPathEvaluationResult<?> result = XPathFactory.newInstance().newXPath()
+                    .evaluateExpression(xpath, doc);
+            switch (result.type()) {
+            case NODE: {
+                Node n = (Node)result.value();
+                visitor.accept(n);
+                break;
+            }
+            case NODESET: {
+                XPathNodes l = (XPathNodes) result.value();
+                l.forEach(n -> {
+                    parseNodeList(n.getChildNodes(), visitor);
+                });
+                break;
+            }}
+            return doc;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

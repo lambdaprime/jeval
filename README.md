@@ -5,7 +5,7 @@ lambdaprime <id.blackmesa@gmail.com>
 
 # Download
 
-You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/release/jeval-9.zip
+You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/release
 
 # Requirements
 
@@ -14,7 +14,7 @@ Java 9
 # Usage
 
 ```bash
-java -jar jeval.jar [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
+jeval [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] "[ARGS]"
 ```
 
 Where: 
@@ -107,6 +107,26 @@ All input/output goes through stdin/stdout.
 - Microprofiler.measureExecutionTime(Runnable r): long
 
   Chooses the best available on current JVM way to measure the execution time and returns it in milliseconds.
+
+### Xml
+
+Query and replace in XML files using XPath.
+
+- Xml.query(xml: String, xpath: String): List<String>
+
+  Query the xml string and return values based on xpath.
+  
+- Xml.query(xml: Path, xpath: String): List<String>
+
+  Query the xml file and return values based on xpath.
+
+- Xml.replace(xml: String, xpath: String, value: String): String
+
+  Query the xml string and replace all values based on xpath. Returns new xml string.
+
+- Xml.replace(xml: Path, xpath: String, value: String)
+
+  Query the xml file and replace all values based on xpath. Replace is done inplace.
 
 # Examples
 
@@ -212,6 +232,7 @@ $ jeval -e "out.println(\"args \" + args[1])" "Hello world"
 ```bash
 $ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
 ```
+
 ## Run command
 
 ```java
@@ -223,5 +244,12 @@ new Exec("curl", "-L", "-G", "http://google.com")
 Or
 
 ```bash
-jeval -e 'new Exec("curl -L -G http://google.com").run().forEach(out::println)'
+$ jeval -e 'new Exec("curl -L -G http://google.com").run().forEach(out::println)'
+```
+
+## Query XML using XPath
+
+```bash
+$ jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "//note/to/@test"))'
+[ggg1, ggg2]
 ```
