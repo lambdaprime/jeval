@@ -100,3 +100,5 @@ out.println(Xml.query(xmlFile, "/notes/note/to[@test=\"ggg2\"]"));
 out.println(Xml.query(xmlFile, "/notes/note/to"));
 out.println(Xml.query(xmlFile, "/notes/note[2]"));
 out.println(Xml.query(xmlFile, "/notes/note/to/@test"));
+
+findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println);

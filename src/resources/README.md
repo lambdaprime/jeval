@@ -42,6 +42,7 @@ java.util.*
 java.util.stream.*
 java.util.concurrent.*;
 java.util.function.*;
+java.util.regex.*;
 java.io.*
 java.nio.*
 java.nio.file.*
@@ -61,7 +62,19 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 
 - sleep(int msec)
 
-Sleeps with no exception
+  Sleeps with no exception
+
+- error(msg: String)
+
+  Throws RuntimeException
+  
+- assertTrue(expr: boolean)
+
+  If expr is false throw RuntimeException
+  
+- findMatches(regexp: String, str: String): Stream<String>
+
+  Search string for substrings which satisfy the regexp and return them in a stream
 
 ## Predefined classes
 
@@ -256,4 +269,10 @@ $ jeval -e 'new Exec("curl -L -G http://google.com").run().stdout.forEach(out::p
 ```bash
 $ jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "//note/to/@test"))'
 [ggg1, ggg2]
+```
+
+### Search substrings using regexp
+
+```bash
+jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println)'
 ```

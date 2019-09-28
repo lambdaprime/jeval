@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.*;
 import java.util.concurrent.*;
 import java.util.function.*;
+import java.util.regex.*;
 import java.io.*;
 import java.nio.*;
 import java.nio.file.*;
@@ -307,4 +308,16 @@ public class Xml {
         }
     }
 
+}
+
+Stream<String> findMatches(String regexp, String str) {
+    return Pattern.compile(regexp).matcher(str).results().map(MatchResult::group);
+}
+
+void error(String msg) {
+    throw new RuntimeException(msg);
+}
+
+void assertTrue(boolean expr) {
+    if (!expr) error("Assertion error");
 }
