@@ -71,7 +71,7 @@ External commands executor.
 
 - Exec(String cmd)
 
-  Constructor which accepts the command to run with the arguments
+  Constructor which accepts the command to run with the arguments separated with whitespaces. The quotes are ignored.
 
 - Exec(String... cmd)
 
@@ -81,9 +81,12 @@ External commands executor.
 
   Specifies whether Exec needs to pass data to the command's standard input 
 
-- run(): Stream<String>
+- run(): Exec.Result
 
-  Runs the command and returns its output and stderr as a single stream.
+  Runs the command and returns the result object which has following fields:
+  
+  - stdout: Stream<String>
+  - stderr: Stream<String>
 
 ### Netcat
 
@@ -238,13 +241,14 @@ $ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
 ```java
 new Exec("curl", "-L", "-G", "http://google.com")
     .run()
+    .stdout
     .forEach(out::println);
 ```
 
 Or
 
 ```bash
-$ jeval -e 'new Exec("curl -L -G http://google.com").run().forEach(out::println)'
+$ jeval -e 'new Exec("curl -L -G http://google.com").run().stdout.forEach(out::println)'
 ```
 
 ## Query XML using XPath

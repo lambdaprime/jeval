@@ -91,6 +91,7 @@ out.println(l > 0);
 
 new Exec("curl", "-L", "-G", "http://google.com")
     .run()
+    .stdout
     .forEach(out::println);
 
 Path xmlFile = Paths.get("src/test/test.xml");

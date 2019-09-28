@@ -113,24 +113,18 @@ public class Microprofiler {
 
 /**
  * Run shell command and obtain its output as stream of lines.
- *
- * Example:
- * 
-new Exec("curl", "-L", "-G", "http://google.com")
-    .run()
-    .forEach(out::println);
-
-new Exec("cat")
-    .withInput(Stream.of("asdfasd", "fdsgdfg"))
-    .run()
-    .forEach(out::println);
- *
  */
 public class Exec {
 
     private String[] cmd;
     private boolean singleLine;
     private Stream<String> input;
+
+    public static class Result {
+        public Stream<String> stdout;
+        public Stream<String> stderr;
+        Result(Stream<String> stdout, Stream<String> stderr) { this.stdout = stdout; this.stderr = stderr; }
+    }
 
     /**
      * Constructor which accepts the command to run and list of arguments
@@ -149,7 +143,7 @@ public class Exec {
         return this;
     }
 
-    public Stream<String> run() {
+    public Result run() {
         try {
             Process p = runProcess();
             BufferedReader in = new BufferedReader(
@@ -161,7 +155,7 @@ public class Exec {
             }
             BufferedReader ein = new BufferedReader(
                 new InputStreamReader(p.getErrorStream()));
-            return Stream.concat(in.lines(), ein.lines());
+            return new Result(in.lines(), ein.lines());
         } catch (Exception e) {
             throw new RuntimeException("Encountered error executing command: " + Arrays.toString(cmd), e);
         }
