@@ -124,6 +124,7 @@ public class Exec {
     public static class Result {
         public Stream<String> stdout;
         public Stream<String> stderr;
+        Future<Integer> code;
         Result(Stream<String> stdout, Stream<String> stderr) { this.stdout = stdout; this.stderr = stderr; }
     }
 
@@ -148,7 +149,7 @@ public class Exec {
         try {
             Process p = runProcess();
             BufferedReader in = new BufferedReader(
-                    new InputStreamReader(p.getInputStream​()));
+                    new InputStreamReader(p.getInputStream()));
             if (input != null) {
                 PrintStream ps = new PrintStream(p.getOutputStream(), true);
                 input.forEach(ps::println);
@@ -156,7 +157,10 @@ public class Exec {
             }
             BufferedReader ein = new BufferedReader(
                 new InputStreamReader(p.getErrorStream()));
-            return new Result(in.lines(), ein.lines());
+            Result result = new Result(in.lines(), ein.lines());
+            result.code = p.onExit().thenApply(proc -> proc.exitValue());
+            return result;
+            
         } catch (Exception e) {
             throw new RuntimeException("Encountered error executing command: " + Arrays.toString(cmd), e);
         }
@@ -168,6 +172,7 @@ public class Exec {
         }
         return new ProcessBuilder(cmd).start();
     }
+
 }
 
 /**
@@ -320,4 +325,8 @@ void error(String msg) {
 
 void assertTrue(boolean expr) {
     if (!expr) error("Assertion error");
+}
+
+void assertTrue(boolean expr, String msg) {
+    if (!expr) error(msg);
 }

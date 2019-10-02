@@ -93,7 +93,12 @@ new Exec("curl", "-L", "-G", "http://google.com")
     .run()
     .stdout
     .forEach(out::println);
-
+int ret = new Exec("ls /sdfgsdfg")
+    .run()
+    .code
+    .get();
+assertTrue(ret == 2, "Return code is wrong");
+    
 Path xmlFile = Paths.get("src/test/test.xml");
 out.println(Xml.query(xmlFile, "//note/to/@test"));
 out.println(Xml.query(xmlFile, "/notes/note/to[@test=\"ggg2\"]"));

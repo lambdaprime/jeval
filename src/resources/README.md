@@ -72,6 +72,10 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 
   If expr is false throw RuntimeException
   
+- assertTrue(expr: boolean, message: String)
+
+  If expr is false throw RuntimeException with message
+
 - findMatches(regexp: String, str: String): Stream<String>
 
   Search string for substrings which satisfy the regexp and return them in a stream
@@ -100,6 +104,7 @@ External commands executor.
   
   - stdout: Stream<String>
   - stderr: Stream<String>
+  - code: Future<Integer>
 
 ### Netcat
 
