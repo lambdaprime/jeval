@@ -136,7 +136,6 @@ public class Main {
         isScript = true;
         Files.readAllLines(Paths.get(file))
             .stream()
-            .filter(Predicate.isEqual("").negate())
             .filter(l -> !isError)
             .forEach(jshExec::onNext);
     }

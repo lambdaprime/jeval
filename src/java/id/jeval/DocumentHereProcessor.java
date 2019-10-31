@@ -21,30 +21,34 @@
 
 package id.jeval;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 class DocumentHereProcessor {
     
     private static final String SOF = "<<EOF";
     private static final String EOF = "EOF";
     
     private StringBuilder buf = new StringBuilder();
-    private StringBuilder documentHere = new StringBuilder();
+    private List<String> documentHere = new LinkedList<>();
     
     public boolean isStarted(String line) {
         line = line.trim();
         if (!line.endsWith("<<" + EOF))
             return false;
         buf.setLength(0);
-        documentHere.setLength(0);
+        documentHere.clear();
         buf.append(line.substring(0, line.length() - SOF.length()));
         return true;
     }
-    
+
     public boolean isFinished(String line) {
         if (line.startsWith(EOF)) {
             buf.append(makeLiteral() + line.substring(EOF.length()));
             return true;
         } else {
-            documentHere.append(line);
+            documentHere.add(line);
             return false;
         }
     }
@@ -54,6 +58,9 @@ class DocumentHereProcessor {
     }
     
     private String makeLiteral() {
-        return "\"" + documentHere.toString().replace("\"", "\\\"") + "\"";
+        String str = documentHere.stream()
+            .map(s -> s.toString().replace("\"", "\\\""))
+            .collect(Collectors.joining("\\n"));
+        return "\"" + str + "\"";
     }
 }
