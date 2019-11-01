@@ -21,11 +21,15 @@
 
 package id.jeval;
 
+import static id.xfunction.Curry.curry;
 import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.util.Arrays.stream;
+
+import id.xfunction.ThrowingRunnable;
+
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
@@ -40,14 +44,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
 
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
@@ -145,22 +143,7 @@ public class Main {
         jshExec.onNext(snippet);
     }
     
-    private static <T, E extends Throwable> ThrowingRunnable<E> curry(
-            ThrowingConsumer<T, E> consumer, T v) {
-        return () -> consumer.accept(v);
-    }
-    
-    @FunctionalInterface
-    interface ThrowingRunnable<E extends Throwable> {
-        void run() throws E;
-    }
-    
-    @FunctionalInterface
-    interface ThrowingConsumer<T, E extends Throwable> {
-        void accept(T t) throws E;
-    }
-    
-    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+    public static void main(String[] args) throws Exception {
         if (args.length < 1) {
             usage();
             exit(1);
@@ -178,8 +161,8 @@ public class Main {
 
         jshExec = new JshExecutor(jshell);
         preloader(jshExec);
-        
-        ThrowingRunnable<Throwable>[] r = new ThrowingRunnable[1];
+
+        ThrowingRunnable<Exception>[] r = new ThrowingRunnable[1];
         Map<String, Consumer<String>> handlers = Map.of(
             "-e", snippet -> r[0] = curry(Main::runSnippet, snippet),
             "-classpath", cp -> stream(cp.split(":"))

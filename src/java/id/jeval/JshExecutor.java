@@ -33,7 +33,7 @@ import jdk.jshell.SourceCodeAnalysis;
 class JshExecutor implements Subscriber<String> {
     
     private JShell jshell;
-    private SourceCodeAnalysis srcAnal; // of course I mean analysis :)
+    private SourceCodeAnalysis srcAnalysis;
     private StringBuilder buf = new StringBuilder();
     private boolean isDocumentHere;
     private DocumentHereProcessor documentHere = new DocumentHereProcessor();
@@ -41,7 +41,7 @@ class JshExecutor implements Subscriber<String> {
     
     public JshExecutor(JShell jshell) {
         this.jshell = jshell;
-        srcAnal = jshell.sourceCodeAnalysis();
+        srcAnalysis = jshell.sourceCodeAnalysis();
     }
 
     @Override
@@ -72,7 +72,7 @@ class JshExecutor implements Subscriber<String> {
         buf.append(line);
         buf.append("\n");
         String snippet = buf.toString();
-        if (srcAnal.analyzeCompletion(snippet).completeness() != COMPLETE)
+        if (srcAnalysis.analyzeCompletion(snippet).completeness() != COMPLETE)
             return;
         boolean isTmpExpression = jshell.eval(snippet).stream()
             .map(e -> e.snippet().subKind())

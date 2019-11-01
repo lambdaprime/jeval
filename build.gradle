@@ -12,6 +12,10 @@ String releaseFileName = "jeval-12.zip"
 String testDir = "$buildDir/test"
 String testSrcDir = "$projectDir/src/test"
 
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+}
+
 sourceSets {
     main {
         java {
@@ -25,7 +29,8 @@ sourceSets {
 
 jar { 
     manifest { 
-        attributes 'Main-Class': 'id.jeval.Main'
+        attributes 'Main-Class': 'id.jeval.Main', 
+                   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
     }
 }
 
@@ -35,6 +40,7 @@ task packageDistribution(type: Zip) {
     from jar.archiveFile
     from file("$projectDir/src/jeval")
     from file("$projectDir/src/jeval.bat")
+    from file("$projectDir/libs")
 }
 
 assemble.dependsOn packageDistribution
