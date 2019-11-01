@@ -143,7 +143,7 @@ public class Main {
         jshExec.onNext(snippet);
     }
     
-    public static void main(String[] args) throws Exception {
+    private static void mainInternal(String[] args) throws Exception {
         if (args.length < 1) {
             usage();
             exit(1);
@@ -199,4 +199,12 @@ public class Main {
         exit(isError? 1: 0);
     }
 
+    public static void main(String[] args) throws Exception {
+        try {
+            mainInternal(args);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            exit(1);
+        }
+    }
 }
