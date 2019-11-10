@@ -1,6 +1,13 @@
+#!/bin/bash
+
 PATH=$JEVAL_PATH:$PATH
 
-jeval -e 'out.println("Hello world")'
+OUT=$(jeval -e 'out.println("Hello world")')
+if [ "$OUT" != "Hello world" ]; then
+    echo "FAILED"
+    exit 1
+fi
+
 jeval -e "range(1,10).forEach(out::println)"
 jeval -e '{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/home/id/workspace/n.xml")); out.println(XPathFactory.newInstance().newXPath().evaluate("//note/to", d));}'
 echo "enter integer"
@@ -18,4 +25,9 @@ jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note>
 jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "/notes/note/to"))'
 jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "/notes/note[2]"))'
 jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "/notes/note/to/@test"))'
-jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println)'
+
+OUT=$(jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println)')
+if [ "$OUT" != "1.jpg"$'\n'"3.jpg" ]; then
+    echo "FAILED"
+    exit 1
+fi

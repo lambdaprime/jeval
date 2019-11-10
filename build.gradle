@@ -1,5 +1,5 @@
 /**
- * gradle build
+ * gradle clean build
  */
 plugins {
     id 'java'
@@ -64,7 +64,7 @@ task myTestFile(type: Exec) {
 
 task myTestSnippet(type: Exec) {
     standardInput = System.in
-    commandLine "sh", testSrcDir + "/test.sh"
+    commandLine "bash", testSrcDir + "/test.sh"
     environment("JEVAL_PATH", testDir)
 }
 
