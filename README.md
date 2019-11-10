@@ -68,7 +68,7 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 
 ## Predefined functions
 
-- sleep(int msec)
+- sleep(long msec)
 
   Sleeps with no exception
 

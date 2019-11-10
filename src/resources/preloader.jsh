@@ -178,7 +178,7 @@ public class Exec {
 /**
  * Sleeps with no exception
  */
-void sleep(int msec) {
+void sleep(long msec) {
     try {
         Thread.sleep(msec);
     } catch (Exception e) { }
