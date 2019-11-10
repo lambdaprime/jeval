@@ -119,6 +119,8 @@ public class Main {
                     out.print(ev.value());
             break;
         case REJECTED:
+        case RECOVERABLE_DEFINED:
+        case RECOVERABLE_NOT_DEFINED:
             isError = true;
             err.println("Rejected snippet: " + ev.snippet().source());
             jshell.diagnostics(ev.snippet())

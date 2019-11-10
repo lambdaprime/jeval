@@ -31,3 +31,9 @@ if [ "$OUT" != "1.jpg"$'\n'"3.jpg" ]; then
     echo "FAILED"
     exit 1
 fi
+
+OUT=$(jeval -e "class X { X(int i) { this.i = i; } }" 2>&1)
+if [ "$OUT" != "Rejected snippet: class X { X(int i) { this.i = i; } }" ]; then
+    echo "FAILED"
+    exit 1
+fi
