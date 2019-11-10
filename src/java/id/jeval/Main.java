@@ -150,15 +150,21 @@ public class Main {
             usage();
             exit(1);
         }
-        
+
+        String classPath = buildClassPath();
         jshell = JShell.builder()
             .out(out)
             .in(in)
             .err(err)
             .executionEngine("local")
-            .compilerOptions("-g:none","-implicit:none", "-proc:none")
+            .compilerOptions("-g:none",
+                "-implicit:none",
+                "-proc:none",
+                "-cp", classPath,
+                "--add-modules", "ALL-MODULE-PATH")
             .build();
-        
+
+        jshell.addToClasspath(classPath);
         jshell.onSnippetEvent(Main::onEvent);
 
         jshExec = new JshExecutor(jshell);
@@ -199,6 +205,10 @@ public class Main {
         jshell.close();
         
         exit(isError? 1: 0);
+    }
+
+    private static String buildClassPath() {
+        return System.getProperty("java.class.path");
     }
 
     public static void main(String[] args) throws Exception {

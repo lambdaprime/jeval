@@ -1,4 +1,4 @@
 JEVAL_PATH=$(readlink -f "$0")
 JEVAL_PATH=$(dirname "$JEVAL_PATH")
 
-java -Xmn64m -Xms128m -Xmx512m -Xss1024k -XX:+UseParallelGC -Xnoclassgc -noverify -jar ${JEVAL_PATH}/jeval.jar "$@"
+java -Xmn64m -Xms128m -Xmx512m -Xss1024k -XX:+UseParallelGC -Xnoclassgc -noverify -cp ${JEVAL_PATH}/jeval.jar:$CLASSPATH id.jeval.Main "$@"

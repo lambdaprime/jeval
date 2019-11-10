@@ -19,11 +19,19 @@ jeval [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] "[ARGS]"
 
 Where: 
 
-JAVA_SCRIPT - Java shell script file to be executed. I prefer to save jshell scripts in *.java extension so Eclipse will automatically highlight the syntax in them.
+JAVA_SCRIPT - Java shell script file to be executed. I prefer to save jshell scripts with *.java extension so Eclipse will automatically highlight the syntax in them.
 
 JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". If your snippet contains quotes "" you need to escape them with backslash. In Linux it is enough to enclose the snippet in single quotes ''.
 
 ARGS - arguments which will be passed to the jshell through the global variable "args: String[]". All arguments should be enclosed in the quotes and passed to *jeval* as a single argument. For example if you want to pass to your jshell code two arguments "Hello world" and "jeval" you need to pass them to jeval like "\\"Hello world\\" jeval".
+
+## Class path
+
+To add new JAR files into class path use CLASSPATH env variable:
+
+``` java
+CLASSPATH=/opt/javafx-sdk-11.0.2/lib/* jeval script.java 
+```
 
 ## Default imports
 
