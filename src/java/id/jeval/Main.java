@@ -50,6 +50,7 @@ import java.util.regex.Pattern;
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
 import jdk.jshell.JShellException;
+import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
 
 public class Main {
@@ -58,6 +59,7 @@ public class Main {
     private static JShell jshell;
     private static boolean isScript;
     private static JshExecutor jshExec;
+    private static List<Snippet> unresolvedSnippets = new ArrayList<>();
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
@@ -119,17 +121,28 @@ public class Main {
                     out.print(ev.value());
             break;
         case REJECTED:
-        case RECOVERABLE_DEFINED:
-        case RECOVERABLE_NOT_DEFINED:
             isError = true;
             err.println("Rejected snippet: " + ev.snippet().source());
-            jshell.diagnostics(ev.snippet())
-                 .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
-                 .forEach(err::println);
+            printLocation(ev.snippet());
+            for (Snippet s: unresolvedSnippets) {
+                err.println("\nUnresolved snippet: ");
+                err.println(s.source());
+                printLocation(s);
+            }
+            break;
+        case RECOVERABLE_DEFINED:
+        case RECOVERABLE_NOT_DEFINED:
+            unresolvedSnippets.add(ev.snippet());
             break;
         default:
             break;
         }
+    }
+
+    private static void printLocation(Snippet snippet) {
+        jshell.diagnostics(snippet)
+            .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
+            .forEach(err::println);
     }
 
     private static void runScript(String file) throws IOException {
