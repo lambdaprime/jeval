@@ -9,7 +9,7 @@ You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/r
 
 # Requirements
 
-Java 9
+Java 11
 
 # Usage
 
