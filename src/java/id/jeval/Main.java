@@ -39,8 +39,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -59,7 +61,7 @@ public class Main {
     private static JShell jshell;
     private static boolean isScript;
     private static JshExecutor jshExec;
-    private static List<Snippet> unresolvedSnippets = new ArrayList<>();
+    private static Map<String, List<Snippet>> unresolvedSnippets = new LinkedHashMap<>();
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
@@ -114,6 +116,8 @@ public class Main {
             isError = true;
             printException(ex);
         }
+        Snippet snippet = ev.snippet();
+        String src = snippet.source();
         switch (ev.status()) {
         case VALID:
             if (ev.value() != null)
@@ -122,17 +126,18 @@ public class Main {
             break;
         case REJECTED:
             isError = true;
-            err.println("Rejected snippet: " + ev.snippet().source());
-            printLocation(ev.snippet());
-            for (Snippet s: unresolvedSnippets) {
+            err.println("Rejected snippet: " + src);
+            printLocation(snippet);
+            for (Entry<String, List<Snippet>> e: unresolvedSnippets.entrySet()) {
                 err.println("\nUnresolved snippet: ");
-                err.println(s.source());
-                printLocation(s);
+                err.println(e.getKey());
+                e.getValue().forEach(Main::printLocation);
             }
             break;
         case RECOVERABLE_DEFINED:
         case RECOVERABLE_NOT_DEFINED:
-            unresolvedSnippets.add(ev.snippet());
+            unresolvedSnippets.putIfAbsent(src, new ArrayList<>());
+            unresolvedSnippets.get(src).add(snippet);
             break;
         default:
             break;

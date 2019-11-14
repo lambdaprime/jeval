@@ -85,3 +85,38 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED 2"
     exit 1
 fi
+
+cat << EOF > /tmp/r
+class X {
+    static X create() {
+        m(null, null);
+        return null;
+    }
+}
+class X {
+    static X create() {
+        m(null, null);
+        return null;
+    }
+}
+Y y = null;
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="Rejected snippet: Y y = null;
+
+cannot find symbol
+  symbol:   class Y
+  location: class 
+at position: 0
+
+Unresolved snippet: 
+class X {
+    static X create() {
+        m(null, null);
+        return null;
+    }
+}"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED 3"
+    exit 1
+fi
