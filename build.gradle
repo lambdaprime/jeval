@@ -8,7 +8,7 @@ plugins {
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
-String releaseFileName = "jeval-12.zip"
+String releaseFileName = "jeval-13.zip"
 String testDir = "$buildDir/test"
 String testSrcDir = "$projectDir/src/test"
 
@@ -41,6 +41,8 @@ task packageDistribution(type: Zip) {
     from file("$projectDir/src/jeval")
     from file("$projectDir/src/jeval.bat")
     from file("$projectDir/libs")
+    from file("$projectDir/LICENSE-2.0.txt")
+    from file("$projectDir/README.md")
 }
 
 assemble.dependsOn packageDistribution
