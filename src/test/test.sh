@@ -120,3 +120,24 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED 3"
     exit 1
 fi
+
+cat << EOF > /tmp/r
+List.of(1,2,3).stream()
+    .filter(i -> i > 0)
+    .map(i -> "-" + i)
+    .peek(out::println)
+    // asdd
+    .collect(toSet()).stream()
+    .forEach(out::println);
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="-1
+-2
+-3
+-1
+-2
+-3"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED 4"
+    exit 1
+fi

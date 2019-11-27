@@ -11,6 +11,28 @@ You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/r
 
 Java 11
 
+# Install
+
+## Linux
+
+``` bash
+echo "export PATH=$PATH:<JEVAL_INSTALL_DIR>" >> ~/.bashrc
+```
+
+Or in case you use Zsh:
+
+```bash
+echo "export PATH=$PATH:<JEVAL_INSTALL_DIR>" >> ~/.zshrc
+```
+
+## Windows
+
+Open cmd and execute following command:
+
+```
+setx PATH "%PATH%;<JEVAL_INSTALL_DIR>"
+```
+
 # Usage
 
 ```bash
