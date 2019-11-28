@@ -1,5 +1,5 @@
 
-**jeval** - command line Java code evaluator. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts.
+**jeval** - command line Java code interpreter. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts.
 
 lambdaprime <id.blackmesa@gmail.com>
 
@@ -52,7 +52,16 @@ ARGS - arguments which will be passed to the jshell through the global variable 
 To add new JAR files into class path use CLASSPATH env variable:
 
 ``` java
-CLASSPATH=/opt/javafx-sdk-11.0.2/lib/* jeval script.java 
+$ CLASSPATH=/opt/javafx-sdk-11.0.2/lib/* jeval script.java 
+```
+
+## JVM arguments
+
+To pass arguments to the JVM use JAVA_ARGS env variable:
+
+``` java
+$ JAVA_ARGS="-Dtest=hello -Xmx50m" jeval -e 'System.getProperty("test")'
+"hello"
 ```
 
 ## Default imports
@@ -309,5 +318,7 @@ $ jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></not
 ### Search substrings using regexp
 
 ```bash
-jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println)'
+$ jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println)'
+1.jpg
+3.jpg
 ```

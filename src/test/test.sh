@@ -141,3 +141,10 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED 4"
     exit 1
 fi
+
+OUT=$(JAVA_ARGS="-Dtest=hello" jeval -e 'System.getProperty("test")')
+EXPECTED="\"hello\""
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED 5"
+    exit 1
+fi
