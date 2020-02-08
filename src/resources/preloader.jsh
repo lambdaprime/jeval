@@ -18,9 +18,15 @@ import java.nio.file.*;
 import javax.xml.parsers.*;
 import javax.xml.xpath.*;
 import java.net.*;
+import java.net.http.*;
+import java.net.http.HttpResponse.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
-        
+
+import id.xfunction.*;
+import id.xfunction.function.*;
+import id.xfunction.net.*;
+
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
 
 /**
@@ -32,22 +38,39 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
  * All input/output goes through stdin/stdout.
  *
  */
-class Netcat {
+public class Netcat {
 
-    static void create(Socket s) throws IOException {
+    private static void create(Socket s) throws IOException {
         Stream<String> sin = new BufferedReader(new InputStreamReader(
             s.getInputStream())).lines();
         ForkJoinPool.commonPool()
-            .execute(() -> sin.forEach(out::println));
+            .execute(() -> sin.forEach(System.out::println));
         PrintStream sout = new PrintStream(s.getOutputStream());
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         stdin.lines().forEach(sout::println);
     }
 
-    static void listen(int port) throws IOException {
+    /**
+     * Starts listening for incoming connection on a given port.
+     * 
+     * All incoming data from the client will be forwarded to System.out.
+     * All input from System.in will be sent back to the client.
+     * 
+     * @throws IOException
+     */
+    public static void listen(int port) throws IOException {
         create(new ServerSocket(port).accept());
     }
 
-    static void connect(String host, int port) throws IOException {
+    /**
+     * Establishes connection with a remote host.
+     * 
+     * All outgoing data from the remote host will be forwarded to System.out.
+     * All input from System.in will be sent to the remote host.
+     * 
+     * @throws IOException
+     */
+    public static void connect(String host, int port) throws IOException {
         create(new Socket(host, port));
     }
 }
@@ -113,69 +136,6 @@ public class Microprofiler {
 }
 
 /**
- * Run shell command and obtain its output as stream of lines.
- */
-public class Exec {
-
-    private String[] cmd;
-    private boolean singleLine;
-    private Stream<String> input;
-
-    public static class Result {
-        public Stream<String> stdout;
-        public Stream<String> stderr;
-        Future<Integer> code;
-        Result(Stream<String> stdout, Stream<String> stderr) { this.stdout = stdout; this.stderr = stderr; }
-    }
-
-    /**
-     * Constructor which accepts the command to run and list of arguments
-     */
-    public Exec(String... cmd) {
-        this.cmd = cmd;
-    }
-
-    public Exec(String cmd) {
-        this(new String[] {cmd});
-        singleLine = true;
-    }
-
-    public Exec withInput(Stream<String> input) {
-        this.input = input;
-        return this;
-    }
-
-    public Result run() {
-        try {
-            Process p = runProcess();
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(p.getInputStream()));
-            if (input != null) {
-                PrintStream ps = new PrintStream(p.getOutputStream(), true);
-                input.forEach(ps::println);
-                ps.close();
-            }
-            BufferedReader ein = new BufferedReader(
-                new InputStreamReader(p.getErrorStream()));
-            Result result = new Result(in.lines(), ein.lines());
-            result.code = p.onExit().thenApply(proc -> proc.exitValue());
-            return result;
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Encountered error executing command: " + Arrays.toString(cmd), e);
-        }
-    }
-
-    private Process runProcess() throws IOException {
-        if (singleLine) {
-            return Runtime.getRuntime().exec(cmd[0]);
-        }
-        return new ProcessBuilder(cmd).start();
-    }
-
-}
-
-/**
  * Sleeps with no exception
  */
 void sleep(long msec) {
@@ -196,123 +156,6 @@ String read() throws Exception {
 
 int readInt() {
     return new Scanner(System.in).nextInt();
-}
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPathEvaluationResult;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPathNodes;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-
-public class Xml {
-
-    public static List<String> query(Path xml, String xpath) {
-        List<String> out = new ArrayList<>();
-        Consumer<Node> visitor = saveVisitor(out);
-        try {
-            xpath_(new InputSource(new FileInputStream(xml.toFile())), xpath, visitor);
-            return out;
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static List<String> query(String xml, String xpath) {
-        List<String> out = new ArrayList<>();
-        Consumer<Node> visitor = saveVisitor(out);
-        xpath_(new InputSource(new StringReader(xml)), xpath, visitor);
-        return out;
-    }
-
-    public static void replace(Path xml, String xpath, String value) {
-        try {
-            Consumer<Node> visitor = replaceVisitor(value);
-            String str = asString(xpath_(new InputSource(new FileInputStream(xml.toFile())), xpath, visitor));
-            Files.writeString(xml, str, StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static String replace(String xml, String xpath, String value) {
-        Consumer<Node> visitor = replaceVisitor(value);
-        return asString(xpath_(new InputSource(new StringReader(xml)), xpath, visitor));
-    }
-
-    private static void parseNodeList(NodeList l, Consumer<Node> visitor) {
-        for (int i = 0; i < l.getLength(); i++) {
-            Node n = l.item(i);
-            switch (n.getNodeType()) {
-            case Node.ELEMENT_NODE: {
-                parseNodeList(n.getChildNodes(), visitor);
-                break;
-            }
-            case Node.TEXT_NODE: {
-                String value = n.getNodeValue();
-                if (value.trim().isEmpty()) continue;
-                visitor.accept(n);
-            }}
-        }
-    }
-
-    private static Consumer<Node> saveVisitor(List<String> out) {
-        return n -> {
-            out.add(n.getNodeValue());
-        };
-    }
-
-    private static Consumer<Node> replaceVisitor(String value) {
-        return n -> {
-            n.setNodeValue(value);
-        };
-    }
-
-    private static String asString(Document doc) {
-        try {
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-            StringWriter writer = new StringWriter();
-            transformer.transform(new DOMSource(doc), new StreamResult(writer));
-            return writer.getBuffer().toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Document xpath_(InputSource src, String xpath, Consumer<Node> visitor) {
-        try {
-            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src);
-            XPathEvaluationResult<?> result = XPathFactory.newInstance().newXPath()
-                    .evaluateExpression(xpath, doc);
-            switch (result.type()) {
-            case NODE: {
-                Node n = (Node)result.value();
-                visitor.accept(n);
-                break;
-            }
-            case NODESET: {
-                XPathNodes l = (XPathNodes) result.value();
-                l.forEach(n -> {
-                    parseNodeList(n.getChildNodes(), visitor);
-                });
-                break;
-            }}
-            return doc;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }
 
 Stream<String> findMatches(String regexp, String str) {

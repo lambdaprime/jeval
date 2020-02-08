@@ -8,7 +8,7 @@ plugins {
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
-String releaseFileName = "jeval-15.zip"
+String releaseFileName = "jeval-16.zip"
 String testDir = "$buildDir/test"
 String testSrcDir = "$projectDir/src/test"
 

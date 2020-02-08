@@ -1,11 +1,15 @@
 
-**jeval** - command line Java code interpreter. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts.
+**jeval** - command line Java code interpreter. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts as well.
+
+To execute Java code **jeval** does not require you to write class body with main method and all boilerplate code. You just write Java as you would do it in jshell.
+
+**jeval** comes with [**xfunction**](https://github.com/lambdaprime/xfunction) library and exports most of it methods to global space.
 
 lambdaprime <id.blackmesa@gmail.com>
 
 # Download
 
-You can download *jeval* from https://github.com/lambdaprime/jeval/blob/master/release
+You can download *jeval* from <https://github.com/lambdaprime/jeval/blob/master/release>
 
 # Requirements
 
@@ -41,7 +45,7 @@ jeval [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] "[ARGS]"
 
 Where: 
 
-JAVA_SCRIPT - Java shell script file to be executed. I prefer to save jshell scripts with *.java extension so Eclipse will automatically highlight the syntax in them.
+JAVA_SCRIPT - Java script file to be executed. I prefer to save jshell scripts with *.java extension so Eclipse will automatically highlight the syntax in them.
 
 JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". If your snippet contains quotes "" you need to escape them with backslash. In Linux it is enough to enclose the snippet in single quotes ''.
 
@@ -67,28 +71,34 @@ $ JAVA_ARGS="-Dtest=hello -Xmx50m" jeval -e 'System.getProperty("test")'
 ## Default imports
 
 ```java
-java.util.stream.IntStream.*
-java.util.stream.Collectors.*
-
-java.lang.System.*
-java.nio.file.Files.*
+java.util.stream.IntStream.*;
+java.util.stream.Collectors.*;
+java.lang.System.*;
+java.nio.file.Files.*;
+java.lang.Math.*;
 java.util.Arrays.*;
-java.lang.Math.*
-javax.script.*
-jdk.nashorn.api.scripting.*
-
-java.util.*
-java.util.stream.*
+javax.script.*;
+jdk.nashorn.api.scripting.*;
+        
+java.util.*;
+java.util.stream.*;
 java.util.concurrent.*;
 java.util.function.*;
 java.util.regex.*;
-java.io.*
-java.nio.*
-java.nio.file.*
-javax.xml.parsers.*
-javax.xml.xpath.*
-java.net.*
-org.w3c.dom.*
+java.io.*;
+java.nio.*;
+java.nio.file.*;
+javax.xml.parsers.*;
+javax.xml.xpath.*;
+java.net.*;
+java.net.http.*;
+java.net.http.HttpResponse.*;
+org.w3c.dom.*;
+org.xml.sax.*;
+
+id.xfunction.*;
+id.xfunction.function.*;
+id.xfunction.net.*;
 ```
 
 ## Predefined variables
@@ -121,30 +131,6 @@ BufferedReader stdin = new BufferedReader(new InputStreamReader(in))
 
 ## Predefined classes
 
-### Exec
-
-External commands executor.
-
-- Exec(String cmd)
-
-  Constructor which accepts the command to run with the arguments separated with whitespaces. The quotes are ignored.
-
-- Exec(String... cmd)
-
-  Constructor which accepts the command to run and list of arguments. Useful in case you don't want to mask upper level quotes.
-  
-- withInput(Stream<String> input)
-
-  Specifies whether Exec needs to pass data to the command's standard input 
-
-- run(): Exec.Result
-
-  Runs the command and returns the result object which has following fields:
-  
-  - stdout: Stream<String>
-  - stderr: Stream<String>
-  - code: Future<Integer>
-
 ### Netcat
 
 Implements netcat operations:
@@ -167,26 +153,6 @@ All input/output goes through stdin/stdout.
 - Microprofiler.measureExecutionTime(Runnable r): long
 
   Chooses the best available on current JVM way to measure the execution time and returns it in milliseconds.
-
-### Xml
-
-Query and replace in XML files using XPath.
-
-- Xml.query(xml: String, xpath: String): List<String>
-
-  Query the xml string and return values based on xpath.
-  
-- Xml.query(xml: Path, xpath: String): List<String>
-
-  Query the xml file and return values based on xpath.
-
-- Xml.replace(xml: String, xpath: String, value: String): String
-
-  Query the xml string and replace all values based on xpath. Returns new xml string.
-
-- Xml.replace(xml: Path, xpath: String, value: String)
-
-  Query the xml file and replace all values based on xpath. Replace is done inplace.
 
 # Examples
 
@@ -315,7 +281,7 @@ $ jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></not
 [ggg1, ggg2]
 ```
 
-### Search substrings using regexp
+## Search substrings using regexp
 
 ```bash
 $ jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out::println)'

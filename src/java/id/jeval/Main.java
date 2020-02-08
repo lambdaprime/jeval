@@ -15,14 +15,14 @@
  */
 package id.jeval;
 
-import static id.xfunction.Curry.curry;
+import static id.xfunction.function.Curry.curry;
 import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.util.Arrays.stream;
 
-import id.xfunction.ThrowingRunnable;
+import id.xfunction.function.ThrowingRunnable;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Stream.concat;

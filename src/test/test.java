@@ -117,3 +117,17 @@ EOF;
 
 out.println(s);
 assertTrue(s.chars().filter(c -> c == '\n').count() == 3);
+
+var client = new HttpClientBuilder()
+    .insecure()
+    .tlsv1()
+    .get()
+    .followRedirects(HttpClient.Redirect.ALWAYS)
+    .cookieHandler(new StaticCookieHandler("name1=value1; name2=value2"))
+    .build();
+var request = HttpRequest.newBuilder()
+    .uri(URI.create("https://google.com"))
+    .GET()
+    .build();
+var response = client.send(request, BodyHandlers.ofString());
+out.println(response.body());

@@ -7,6 +7,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/xfunction-2.0.jar"/>
+	<classpathentry kind="lib" path="libs/xfunction-7.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
