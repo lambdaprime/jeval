@@ -4,6 +4,7 @@ import static java.lang.System.*;
 import static java.nio.file.Files.*;
 import static java.lang.Math.*;
 import static java.util.Arrays.*;
+
 import javax.script.*;
 import jdk.nashorn.api.scripting.*;
         
@@ -26,6 +27,7 @@ import org.xml.sax.*;
 import id.xfunction.*;
 import id.xfunction.function.*;
 import id.xfunction.net.*;
+import static id.xfunction.CommandLineInterface.*;
 
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
 
@@ -148,14 +150,6 @@ String[] args = new String[0];
 
 void printf(String s) {
     out.print(String.format(s));
-}
-
-String read() throws Exception {
-    return stdin.readLine();
-}
-
-int readInt() {
-    return new Scanner(System.in).nextInt();
 }
 
 Stream<String> findMatches(String regexp, String str) {

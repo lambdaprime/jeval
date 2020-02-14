@@ -1,5 +1,5 @@
 
-**jeval** - command line Java code interpreter. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. *jeval* allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With *jeval* you can execute complete Java shell scripts as well.
+**jeval** - command line Java code interpreter. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. **jeval** allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With **jeval** you can execute complete Java shell scripts as well.
 
 To execute Java code **jeval** does not require you to write class body with main method and all boilerplate code. You just write Java as you would do it in jshell.
 
@@ -9,7 +9,7 @@ lambdaprime <id.blackmesa@gmail.com>
 
 # Download
 
-You can download *jeval* from <https://github.com/lambdaprime/jeval/blob/master/release>
+You can download **jeval** from <https://github.com/lambdaprime/jeval/blob/master/release>
 
 # Requirements
 
@@ -99,6 +99,7 @@ org.xml.sax.*;
 id.xfunction.*;
 id.xfunction.function.*;
 id.xfunction.net.*;
+id.xfunction.CommandLineInterface.*;
 ```
 
 ## Predefined variables

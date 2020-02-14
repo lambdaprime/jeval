@@ -148,3 +148,11 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED 5"
     exit 1
 fi
+
+OUT=$(yes yes | jeval -e 'cli.askConfirm("Execute this?")')
+EXPECTED="Execute this?
+Please confirm [yes/no]: true"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED 6 $OUT"
+    exit 1
+fi
