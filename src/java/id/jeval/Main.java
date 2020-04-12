@@ -20,40 +20,29 @@ import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.in;
 import static java.lang.System.out;
-import static java.util.Arrays.stream;
-
-import id.xfunction.function.ThrowingRunnable;
-
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import jdk.jshell.EvalException;
+import static java.util.Arrays.stream;
+
+import id.xfunction.function.ThrowingRunnable;
 import jdk.jshell.JShell;
-import jdk.jshell.JShellException;
-import jdk.jshell.Snippet;
-import jdk.jshell.SnippetEvent;
 
 public class Main {
 
-    private static boolean isError = false;
+    private static Utils utils = new Utils();
     private static JShell jshell;
-    private static boolean isScript;
     private static JshExecutor jshExec;
-    private static Map<String, List<Snippet>> unresolvedSnippets = new LinkedHashMap<>();
+    private static EventHandler eventHandler;
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
@@ -65,21 +54,11 @@ public class Main {
 
     @SuppressWarnings("resource")
     private static void preloader(JshExecutor jshExec) throws IOException {
-        isScript = true;
+        eventHandler.setIsScript(true);
         Scanner scanner = new Scanner(Main.class.getResource("/preloader.jsh").openStream())
                 .useDelimiter("\n");
         while (scanner.hasNext())
             jshExec.onNext(scanner.next());
-    }
-    
-    private static void printException(Throwable ex) {
-        if (ex instanceof EvalException) {
-            EvalException evx = (EvalException)ex;
-            out.format("%s %s\n", evx.getExceptionClassName(), evx.getMessage());
-        }
-        concat(of(ex, ex.getCause()), Arrays.stream(ex.getSuppressed()))
-            .filter(e -> e != null)
-            .forEach(Throwable::printStackTrace);
     }
     
     private static void defineArgs(JshExecutor jshExec, List<String> args) {
@@ -89,56 +68,16 @@ public class Main {
                 .collect(joining(", "))));
     }
     
-    private static void onEvent(SnippetEvent ev) {
-        JShellException ex = ev.exception();
-        if (ex != null) {
-            isError = true;
-            printException(ex);
-        }
-        Snippet snippet = ev.snippet();
-        String src = snippet.source();
-        switch (ev.status()) {
-        case VALID:
-            if (ev.value() != null)
-                if (!isScript || !ev.isSignatureChange())
-                    out.print(ev.value());
-            break;
-        case REJECTED:
-            isError = true;
-            err.println("Rejected snippet: " + src);
-            printLocation(snippet);
-            for (Entry<String, List<Snippet>> e: unresolvedSnippets.entrySet()) {
-                err.println("\nUnresolved snippet: ");
-                err.println(e.getKey());
-                e.getValue().forEach(Main::printLocation);
-            }
-            break;
-        case RECOVERABLE_DEFINED:
-        case RECOVERABLE_NOT_DEFINED:
-            unresolvedSnippets.putIfAbsent(src, new ArrayList<>());
-            unresolvedSnippets.get(src).add(snippet);
-            break;
-        default:
-            break;
-        }
-    }
-
-    private static void printLocation(Snippet snippet) {
-        jshell.diagnostics(snippet)
-            .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
-            .forEach(err::println);
-    }
-
     private static void runScript(String file) throws IOException {
-        isScript = true;
+        eventHandler.setIsScript(true);
         Files.readAllLines(Paths.get(file))
             .stream()
-            .filter(l -> !isError)
+            .filter(l -> !eventHandler.isError())
             .forEach(jshExec::onNext);
     }
     
     private static void runSnippet(String snippet) {
-        isScript = false;
+        eventHandler.setIsScript(false);
         jshExec.onNext(snippet);
     }
     
@@ -162,7 +101,9 @@ public class Main {
             .build();
 
         jshell.addToClasspath(classPath);
-        jshell.onSnippetEvent(Main::onEvent);
+        
+        eventHandler = new EventHandler(jshell);
+        jshell.onSnippetEvent(eventHandler::onEvent);
 
         jshExec = new JshExecutor(jshell);
         preloader(jshExec);
@@ -201,12 +142,12 @@ public class Main {
             runnable[0].run();
             jshExec.onComplete();
         } catch (Throwable ex) {
-            printException(ex);
+            utils.printExceptions(ex);
         } 
 
         jshell.close();
         
-        exit(isError? 1: 0);
+        exit(eventHandler.isError()? 1: 0);
     }
 
     private static String buildClassPath() {
