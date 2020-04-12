@@ -4,6 +4,7 @@ import static java.lang.System.*;
 import static java.nio.file.Files.*;
 import static java.lang.Math.*;
 import static java.util.Arrays.*;
+import static java.lang.String.*;
 
 import javax.script.*;
 import jdk.nashorn.api.scripting.*;
@@ -148,8 +149,8 @@ void sleep(long msec) {
 
 String[] args = new String[0];
 
-void printf(String s) {
-    out.print(String.format(s));
+void printf(String s, String...fmt) {
+    out.print(String.format(s, fmt));
 }
 
 Stream<String> findMatches(String regexp, String str) {

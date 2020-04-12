@@ -40,16 +40,16 @@ setx PATH "%PATH%;<JEVAL_INSTALL_DIR>"
 # Usage
 
 ```bash
-jeval [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] "[ARGS]"
+jeval [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
 ```
 
 Where: 
 
 JAVA_SCRIPT - Java script file to be executed. I prefer to save jshell scripts with *.java extension so Eclipse will automatically highlight the syntax in them.
 
-JAVA_SNIPPET - Java expression. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". If your snippet contains quotes "" you need to escape them with backslash. In Linux it is enough to enclose the snippet in single quotes ''.
+JAVA_SNIPPET - Java expression. **jeval** will evaluate the expression and print its result. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". If your snippet contains quotes "" you need to escape them with backslash. In Linux it is enough to enclose the snippet in single quotes ''.
 
-ARGS - arguments which will be passed to the jshell through the global variable "args: String[]". All arguments should be enclosed in the quotes and passed to *jeval* as a single argument. For example if you want to pass to your jshell code two arguments "Hello world" and "jeval" you need to pass them to jeval like "\\"Hello world\\" jeval".
+ARGS - optional user arguments which will be available to you through the global variable "args: String[]". 
 
 ## Class path
 
@@ -251,7 +251,8 @@ $ jeval -e "Netcat.listen(31337)"
 ## Use commandline arguments
 
 ```bash
-$ jeval -e "out.println(\"args \" + args[1])" "Hello world"
+$ jeval -e 'format("args %s, %s\n", args[0], args[1])' "arg1" "arg2"
+args arg1, arg2
 ```
 
 ## Measure execution real time
@@ -289,3 +290,9 @@ $ jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out:
 1.jpg
 3.jpg
 ```
+# FAQ
+
+## Why jeval -e 'out.format("args")' prints java.io.PrintStream@ at the end
+
+With -e option **jeval** evaluates the expression and prints its result. In this case method PrintStream::format returns reference to PrintStream so that is why it is printed.
+To overcome this you can use printf method defined by **jeval**.

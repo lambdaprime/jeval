@@ -40,8 +40,6 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
@@ -74,19 +72,6 @@ public class Main {
             jshExec.onNext(scanner.next());
     }
     
-    private static List<String> splitByArgs(String s) {
-        String regex = "\"([^\"]*)\"|(\\S+)";
-        Matcher m = Pattern.compile(regex).matcher(s);
-        List<String> r = new ArrayList<>();
-        while (m.find()) {
-            if (m.group(1) != null)
-                r.add(m.group(1));
-            else
-                r.add(m.group(2));
-        }
-        return r;
-    }
-    
     private static void printException(Throwable ex) {
         if (ex instanceof EvalException) {
             EvalException evx = (EvalException)ex;
@@ -97,9 +82,9 @@ public class Main {
             .forEach(Throwable::printStackTrace);
     }
     
-    private static void defineArgs(JshExecutor jshExec, String args) {
+    private static void defineArgs(JshExecutor jshExec, List<String> args) {
         jshExec.onNext(String.format("args = new String[]{%s};", 
-            splitByArgs(args).stream()
+            args.stream()
                 .map(s -> "\"" + s + "\"")
                 .collect(joining(", "))));
     }
@@ -182,33 +167,38 @@ public class Main {
         jshExec = new JshExecutor(jshell);
         preloader(jshExec);
 
-        ThrowingRunnable<Exception>[] r = new ThrowingRunnable[1];
+        ThrowingRunnable<Exception>[] runnable = new ThrowingRunnable[1];
         Map<String, Consumer<String>> handlers = Map.of(
-            "-e", snippet -> r[0] = curry(Main::runSnippet, snippet),
+            "-e", snippet -> runnable[0] = curry(Main::runSnippet, snippet),
             "-classpath", cp -> stream(cp.split(":"))
                 .forEach(jshell::addToClasspath)
         );
-        
+
+        List<String> runnableArgs = new ArrayList<>();
         Function<String, Boolean> defaultHandler = arg -> {
-            if (r[0] != null) {
-                defineArgs(jshExec, arg);
-                return false;
+            if (runnable[0] != null) {
+                // if we set the runnable already we can start
+                // populate the args
+                runnableArgs.add(arg);
+                return true;
             }
-            r[0] = curry(Main::runScript, arg);
+            runnable[0] = curry(Main::runScript, arg);
             return true;
         };
         
         try
         {
             new SmartArgs(handlers, defaultHandler).parse(args);
-            if (r[0] == null) throw new Exception();
+            if (runnable[0] == null) throw new Exception();
         } catch (Exception e) {
             usage();
             exit(1);
         }
         
+        defineArgs(jshExec, runnableArgs);
+        
         try {
-            r[0].run();
+            runnable[0].run();
             jshExec.onComplete();
         } catch (Throwable ex) {
             printException(ex);

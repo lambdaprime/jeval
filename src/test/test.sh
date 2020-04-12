@@ -17,7 +17,6 @@ jeval -e 'Files.createTempFile(null, "tmp")'
 echo "enter lines"
 echo -e "asdfasdf\ngggggggg" | jeval -e 'stdin.lines().collect(joining(","))'
 echo '{"menu":123}' | jeval -e 'new ScriptEngineManager().getEngineByName("nashorn").eval("var v = " + stdin.lines().collect(joining("\n")) + "; v[\"menu\"]");'
-jeval -e 'out.println("args " + args[1])' "Hello world"
 jeval -e 'new Exec("curl -L -G http://google.com").run().stdout.forEach(out::println)'
 jeval -e 'assertTrue(2 == new Exec("ls /sdfgsdfg").run().code.get(), "Return code is wrong")'
 jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "//note/to/@test"))'
@@ -142,6 +141,7 @@ if [ "$OUT" != "$EXPECTED" ]; then
     exit 1
 fi
 
+# Test that jeval supports JAVA_ARGS
 OUT=$(JAVA_ARGS="-Dtest=hello" jeval -e 'System.getProperty("test")')
 EXPECTED="\"hello\""
 if [ "$OUT" != "$EXPECTED" ]; then
@@ -149,10 +149,19 @@ if [ "$OUT" != "$EXPECTED" ]; then
     exit 1
 fi
 
+# Test askConfirm
 OUT=$(yes yes | jeval -e 'cli.askConfirm("Execute this?")')
 EXPECTED="Execute this?
 Please confirm [yes/no]: true"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED 6 $OUT"
+    exit 1
+fi
+
+# Test multiple arguments are available from args
+OUT=$(jeval -e 'printf("args %s, %s\n", args[0], args[1])' "arg1" "arg2")
+EXPECTED="args arg1, arg2"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED 7 $OUT"
     exit 1
 fi
