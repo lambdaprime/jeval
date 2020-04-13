@@ -5,6 +5,8 @@ To execute Java code **jeval** does not require you to write class body with mai
 
 **jeval** comes with [**xfunction**](https://github.com/lambdaprime/xfunction) library and exports most of it methods to global space.
 
+Version: @version@
+
 lambdaprime <id.blackmesa@gmail.com>
 
 # Download

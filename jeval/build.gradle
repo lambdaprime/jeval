@@ -18,10 +18,12 @@ targetCompatibility = '1.9'
 
 def projectName = 'jeval'
 def releaseFileName = "${projectName}.zip"
+def releaseDir = "release/$projectName/$projectName"
 
 jar { 
     manifest { 
-        attributes 'Main-Class': 'id.jeval.Main', 
+        attributes 'Implementation-Version': "${rootProject.version}",
+                   'Main-Class': 'id.jeval.Main', 
                    'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
     }
 }
@@ -36,15 +38,20 @@ packageDistribution.doLast {
     delete "$projectDir/release/$projectName"
 }
 
-task createRelease(type: Copy) {
-    def out = "release/$projectName/$projectName"
+import org.apache.tools.ant.filters.ReplaceTokens
+task updateVersion(type:Copy) {
+    from "${project.rootDir}/README.md"
+    into releaseDir
+    filter(ReplaceTokens, tokens: [version: rootProject.version])
+}
+
+task createRelease(type: Copy, dependsOn: updateVersion) {
     from jar.archiveFile
     from file("$projectDir/libs")
-    from "${project.rootDir}/README.md"
     from "${project.rootDir}/LICENSE-2.0.txt"
     from file("$projectDir/src/jeval")
     from file("$projectDir/src/jeval.bat")
-    into out
+    into releaseDir
 }
 
 task cleanRelease(type: Delete) {
