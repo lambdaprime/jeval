@@ -2,13 +2,12 @@ package id.jeval;
 
 import static java.lang.System.err;
 import static java.lang.System.out;
+import static java.util.stream.Collectors.toList;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
+import jdk.jshell.Diag;
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
 import jdk.jshell.JShellException;
@@ -21,7 +20,7 @@ public class EventHandler {
     private boolean isScript;
     private JShell jshell;
     private boolean isError = false;
-    private Map<String, List<Snippet>> unresolvedSnippets = new LinkedHashMap<>();
+    private LinkedList<Snippet> unresolvedSnippets = new LinkedList<>();
 
     public EventHandler(JShell jshell) {
         this.jshell = jshell;
@@ -42,7 +41,6 @@ public class EventHandler {
             printException(ex);
         }
         Snippet snippet = ev.snippet();
-        String src = snippet.source();
         switch (ev.status()) {
         case VALID:
             if (ev.value() != null)
@@ -51,26 +49,27 @@ public class EventHandler {
             break;
         case REJECTED:
             isError = true;
-            err.println("Rejected snippet: " + src);
-            printLocation(snippet);
-            for (Entry<String, List<Snippet>> e: unresolvedSnippets.entrySet()) {
-                err.println("\nUnresolved snippet: ");
-                err.println(e.getKey());
-                e.getValue().forEach(this::printLocation);
-            }
+            unresolvedSnippets.push(snippet);
+            unresolvedSnippets.stream()
+                .forEach(this::printUnresolvedSnippet);
             break;
         case RECOVERABLE_DEFINED:
-        case RECOVERABLE_NOT_DEFINED:
-            unresolvedSnippets.putIfAbsent(src, new ArrayList<>());
-            unresolvedSnippets.get(src).add(snippet);
+        case RECOVERABLE_NOT_DEFINED: {
+            unresolvedSnippets.push(snippet);
             break;
+        }
         default:
             break;
         }
     }
 
-    private void printLocation(Snippet snippet) {
-        jshell.diagnostics(snippet)
+    private void printUnresolvedSnippet(Snippet snippet) {
+        List<Diag> diag = jshell.diagnostics(snippet)
+                .collect(toList());
+        String src = snippet.source();
+        err.println("\nUnresolved snippet:");
+        err.println(src);
+        diag.stream()
             .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
             .forEach(err::println);
     }

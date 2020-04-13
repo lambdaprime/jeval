@@ -51,14 +51,26 @@ String m() {
 Y y = null;
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="Rejected snippet: Y y = null;
+EXPECTED="
+Unresolved snippet:
+Y y = null;
 
 cannot find symbol
   symbol:   class Y
   location: class 
 at position: 0
 
-Unresolved snippet: 
+Unresolved snippet:
+class Y {
+    X x;
+    static Y c(Z h, List<String> d) {
+        if (y != null) return y;
+        return null;
+    }
+}
+
+
+Unresolved snippet:
 class X {
     static X create() {
         m(null, null);
@@ -70,29 +82,20 @@ method m in class  cannot be applied to given types;
   required: no arguments
   found: <nulltype>,<nulltype>
   reason: actual and formal argument lists differ in length
-at position: 42
-
-Unresolved snippet: 
-class Y {
-    X x;
-    static Y c(Z h, List<String> d) {
-        if (y != null) return y;
-        return null;
-    }
-}"
+at position: 42"
 if [ "$OUT" != "$EXPECTED" ]; then
-    echo "FAILED 2"
+    echo "FAILED 2 $OUT"
     exit 1
 fi
 
 cat << EOF > /tmp/r
-class X {
+class X1 {
     static X create() {
         m(null, null);
         return null;
     }
 }
-class X {
+class X2 {
     static X create() {
         m(null, null);
         return null;
@@ -101,22 +104,33 @@ class X {
 Y y = null;
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="Rejected snippet: Y y = null;
+EXPECTED="
+Unresolved snippet:
+Y y = null;
 
 cannot find symbol
   symbol:   class Y
   location: class 
 at position: 0
 
-Unresolved snippet: 
-class X {
+Unresolved snippet:
+class X2 {
+    static X create() {
+        m(null, null);
+        return null;
+    }
+}
+
+
+Unresolved snippet:
+class X1 {
     static X create() {
         m(null, null);
         return null;
     }
 }"
 if [ "$OUT" != "$EXPECTED" ]; then
-    echo "FAILED 3"
+    echo "FAILED 3 $OUT"
     exit 1
 fi
 
