@@ -9,7 +9,7 @@ lambdaprime <id.blackmesa@gmail.com>
 
 # Download
 
-You can download **jeval** from <https://github.com/lambdaprime/jeval/blob/master/release>
+You can download **jeval** from <https://github.com/lambdaprime/jeval/blob/master/jeval/release>
 
 # Requirements
 

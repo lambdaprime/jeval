@@ -1,0 +1,63 @@
+/**
+ * gradle clean build
+ */
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+ 
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+}
+
+sourceCompatibility = '1.9'
+targetCompatibility = '1.9'
+
+def projectName = 'jeval'
+def releaseFileName = "${projectName}.zip"
+
+jar { 
+    manifest { 
+        attributes 'Main-Class': 'id.jeval.Main', 
+                   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+    }
+}
+
+task packageDistribution(type: Zip) {
+    archiveFileName = "$releaseFileName"
+    destinationDirectory = file("$projectDir/release")
+    from file("$projectDir/release/$projectName")
+}
+
+packageDistribution.doLast {
+    delete "$projectDir/release/$projectName"
+}
+
+task createRelease(type: Copy) {
+    def out = "release/$projectName/$projectName"
+    from jar.archiveFile
+    from file("$projectDir/libs")
+    from "${project.rootDir}/README.md"
+    from "${project.rootDir}/LICENSE-2.0.txt"
+    from file("$projectDir/src/jeval")
+    from file("$projectDir/src/jeval.bat")
+    into out
+}
+
+task cleanRelease(type: Delete) {
+    delete "$projectDir/release"
+}
+
+packageDistribution.dependsOn createRelease
+assemble.dependsOn packageDistribution
+clean.dependsOn cleanRelease
+
+task copyReadme(type: Copy) {
+    from("$projectDir/README.md")
+    into("$projectDir/src/main/resources")
+}
+
+compileJava.dependsOn copyReadme
