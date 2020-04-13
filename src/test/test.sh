@@ -179,3 +179,26 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED 7 $OUT"
     exit 1
 fi
+
+# Test that jeval shows unresolved references
+cat << EOF > /tmp/r
+void f() {
+    printf("ggg");
+    printf(g);
+}
+
+f();
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="Unresolved references: variable g
+jdk.jshell.UnresolvedReferenceException: Attempt to use definition snippet with unresolved references in MethodSnippet:f/()void-void f() {
+    printf(\"ggg\");
+    printf(g);
+}
+
+	at .f(#47:1)
+	at .(#49:1)"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED 8 $OUT"
+    exit 1
+fi
