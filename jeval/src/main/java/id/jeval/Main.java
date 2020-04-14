@@ -15,7 +15,7 @@
  */
 package id.jeval;
 
-import static id.xfunction.function.Curry.curry;
+import static id.xfunction.function.Curry.curryAccept;
 import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.in;
@@ -110,7 +110,7 @@ public class Main {
 
         ThrowingRunnable<Exception>[] runnable = new ThrowingRunnable[1];
         Map<String, Consumer<String>> handlers = Map.of(
-            "-e", snippet -> runnable[0] = curry(Main::runSnippet, snippet),
+            "-e", snippet -> runnable[0] = curryAccept(Main::runSnippet, snippet),
             "-classpath", cp -> stream(cp.split(":"))
                 .forEach(jshell::addToClasspath)
         );
@@ -123,7 +123,7 @@ public class Main {
                 runnableArgs.add(arg);
                 return true;
             }
-            runnable[0] = curry(Main::runScript, arg);
+            runnable[0] = curryAccept(Main::runScript, arg);
             return true;
         };
         

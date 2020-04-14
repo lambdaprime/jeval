@@ -89,13 +89,13 @@ l = new Microprofiler().measureUserCpuTime(() -> {
 });
 out.println(l > 0);
 
-new Exec("curl", "-L", "-G", "http://google.com")
+new XExec("curl", "-L", "-G", "http://google.com")
     .run()
-    .stdout
+    .stdout()
     .forEach(out::println);
-int ret = new Exec("ls /sdfgsdfg")
+int ret = new XExec("ls /sdfgsdfg")
     .run()
-    .code
+    .code()
     .get();
 assertTrue(ret == 2, "Return code is wrong");
     

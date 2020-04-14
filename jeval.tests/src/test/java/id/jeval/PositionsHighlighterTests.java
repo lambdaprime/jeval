@@ -23,8 +23,8 @@ public class PositionsHighlighterTests {
     @ParameterizedTest
     @MethodSource("testDataProvider")
     public void test(List data) {
-        String text = XUtils.readResource("/" + data.get(0) + ".in");
-        String expected = XUtils.readResource("/" + data.get(0) + ".out");
+        String text = XUtils.readResource(data.get(0) + ".in");
+        String expected = XUtils.readResource(data.get(0) + ".out");
         assertEquals(expected, new PositionsHighlighter().highlight(text, (List<Integer>)data.get(1)));
     }
 }
