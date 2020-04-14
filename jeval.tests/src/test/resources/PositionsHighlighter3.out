@@ -1,0 +1,7 @@
+class X {
+    static X create() {
+        m(null, null);
+        ^
+        return null;
+    }
+}

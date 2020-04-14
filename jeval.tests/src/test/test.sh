@@ -54,6 +54,7 @@ OUT=$(jeval /tmp/r 2>&1)
 EXPECTED="
 Unresolved snippet:
 Y y = null;
+^
 
 cannot find symbol
   symbol:   class Y
@@ -74,6 +75,7 @@ Unresolved snippet:
 class X {
     static X create() {
         m(null, null);
+        ^
         return null;
     }
 }
@@ -107,6 +109,7 @@ OUT=$(jeval /tmp/r 2>&1)
 EXPECTED="
 Unresolved snippet:
 Y y = null;
+^
 
 cannot find symbol
   symbol:   class Y

@@ -2,11 +2,14 @@ package id.jeval;
 
 import static java.lang.System.err;
 import static java.lang.System.out;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import jdk.jshell.Diag;
 import jdk.jshell.EvalException;
@@ -66,14 +69,23 @@ public class EventHandler {
     }
 
     private void printUnresolvedSnippet(Snippet snippet) {
-        List<Diag> diag = jshell.diagnostics(snippet)
-                .collect(toList());
         String src = snippet.source();
+        List<Entry<Long, List<Diag>>> diags = jshell.diagnostics(snippet)
+                .collect(groupingBy(Diag::getStartPosition))
+                .entrySet()
+                .stream()
+                .sorted(Comparator.comparingLong(Entry::getKey))
+                .collect(toList());
         err.println("\nUnresolved snippet:");
-        err.println(src);
-        diag.stream()
-            .map(d -> d.getMessage(null) + "\nat position: " + d.getStartPosition())
-            .forEach(err::println);
+        err.println(new PositionsHighlighter().highlight(src, diags.stream()
+            .map(e -> e.getKey().intValue())
+            .collect(toList())));
+        for (Entry<Long, List<Diag>> e: diags) {
+            long pos = e.getKey();
+            for (Diag d: e.getValue()) {
+                err.println(d.getMessage(null) + "\nat position: " + pos);
+            }
+        }
     }
 
     private void printException(Throwable ex) {
