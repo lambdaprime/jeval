@@ -5,11 +5,13 @@ To execute Java code **jeval** does not require you to write class body with mai
 
 **jeval** comes with [**xfunction**](https://github.com/lambdaprime/xfunction) library and exports most of it methods to global space.
 
+Version: 17
+
 lambdaprime <id.blackmesa@gmail.com>
 
 # Download
 
-You can download **jeval** from <https://github.com/lambdaprime/jeval/blob/master/release>
+You can download **jeval** from <https://github.com/lambdaprime/jeval/blob/master/jeval/release>
 
 # Requirements
 
@@ -264,16 +266,16 @@ $ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
 ## Run command
 
 ```java
-new Exec("curl", "-L", "-G", "http://google.com")
+new XExec("curl", "-L", "-G", "http://google.com")
     .run()
-    .stdout
+    .stdout()
     .forEach(out::println);
 ```
 
 Or
 
 ```bash
-$ jeval -e 'new Exec("curl -L -G http://google.com").run().stdout.forEach(out::println)'
+$ jeval -e 'new XExec("curl -L -G http://google.com").run().stdout.forEach(out::println)'
 ```
 
 ## Query XML using XPath
