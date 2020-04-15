@@ -162,7 +162,7 @@ All input/output goes through stdin/stdout.
 ## Say hello to the world:
 
 ```bash
-$ jeval -e "out.println(\"Hello world\")"
+$ jeval -e 'out.println("Hello world")'
 Hello world
 ```
 
@@ -184,46 +184,46 @@ $ jeval -e "range(1,10).forEach(out::println)"
 ## Read XML and print value of the element using its XPath:
 
 ```bash
-$ jeval -e "{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(\"/home/id/workspace/n.xml\")); out.println(XPathFactory.newInstance().newXPath().evaluate(\"//note/to\", d));}"
+$ cat << EOF > /tmp/r.xml
+<notes>
+    <note>
+        <to test="ggg1">Tove</to>
+    </note>
+    <note>
+        <to test="ggg2">Bove</to>
+    </note>
+</notes>
+EOF
+$ jeval -e '{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/tmp/r.xml")); out.println(XPathFactory.newInstance().newXPath().evaluate("//note/to", d));}'
 Tove
 ```
 
 ## Return integer in binary format:
 
 ```bash
-$ jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
-14
-"1110"
-```
-
-Or using pipe
-
-```bash
-$ echo 14 | jeval -e "Integer.toBinaryString(new Scanner(in).nextInt())"
+$ echo 14 | jeval -e 'Integer.toBinaryString(new Scanner(in).nextInt())'
 "1110"
 ```
 
 ## Create temporary file and return its name
 
 ```bash
-$ jeval -e "Files.createTempFile(null, \"tmp\")"
+$ jeval -e 'Files.createTempFile(null, "tmp")'
 /tmp/11873450107364399793tmp
 ```
 
 ## Join lines using "," as a delimeter
 
 ```bash
-$ jeval -e "stdin.lines().collect(joining(\",\"))"
-ab
-cd
-ef
+$ echo -e "ab\ncd\nef" | jeval -e "stdin.lines().collect(joining(\",\"))"
 "ab,cd,ef"
 ```
 
 ## Execute JavaScript snippet which will read JSON and return value of specified parameter
 
 ```bash
-$ echo '{"menu":123}' | jeval -e "new ScriptEngineManager().getEngineByName(\"nashorn\").eval(\"var v = \" + stdin.lines().collect(joining(\"\n\")) + \"; v[\\\"menu\\\"]\");"
+$ echo '{"menu":123}' | jeval -e 'new ScriptEngineManager().getEngineByName("nashorn").eval("var v = " + stdin.lines().collect(joining("\n")) + "; v[\"menu\"]");'
+123
 ```
 
 ## Use "document-here" construction
@@ -253,8 +253,8 @@ $ jeval -e "Netcat.listen(31337)"
 ## Use commandline arguments
 
 ```bash
-$ jeval -e 'format("args %s, %s\n", args[0], args[1])' "arg1" "arg2"
-args arg1, arg2
+$ jeval -e 'format("args %s, %s", args[0], args[1])' "arg1" "arg2"
+"args arg1, arg2"
 ```
 
 ## Measure execution real time
@@ -265,17 +265,8 @@ $ jeval -e "new Microprofiler().measureRealTime(() -> sleep(1000));"
 
 ## Run command
 
-```java
-new XExec("curl", "-L", "-G", "http://google.com")
-    .run()
-    .stdout()
-    .forEach(out::println);
-```
-
-Or
-
 ```bash
-$ jeval -e 'new XExec("curl -L -G http://google.com").run().stdout.forEach(out::println)'
+$ jeval -e 'new XExec("curl -L -G -vvv http://google.com").run().stderr().forEach(out::println)'
 ```
 
 ## Query XML using XPath

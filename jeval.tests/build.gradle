@@ -38,6 +38,12 @@ task myTestFile(type: Exec) {
     commandLine testDir + "/jeval", testSrcDir + "/test.java"
 }
 
+task myTestReadme(type: Exec) {
+    standardInput = System.in
+    commandLine "bash", testSrcDir + "/test-readme.sh"
+    environment("JEVAL_PATH", testDir)
+}
+
 task myTestSnippet(type: Exec) {
     standardInput = System.in
     commandLine "bash", testSrcDir + "/test.sh"
@@ -54,5 +60,6 @@ test {
 test.dependsOn myTest
 test.dependsOn myTestFile
 test.dependsOn myTestSnippet
+test.dependsOn myTestReadme
 myTestFile.mustRunAfter myTest
 myTestSnippet.mustRunAfter myTest
