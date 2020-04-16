@@ -34,12 +34,12 @@ import java.util.function.Function;
 
 import static java.util.Arrays.stream;
 
+import id.xfunction.XUtils;
 import id.xfunction.function.ThrowingRunnable;
 import jdk.jshell.JShell;
 
 public class Main {
 
-    private static Utils utils = new Utils();
     private static JShell jshell;
     private static JshExecutor jshExec;
     private static EventHandler eventHandler;
@@ -142,7 +142,7 @@ public class Main {
             runnable[0].run();
             jshExec.onComplete();
         } catch (Throwable ex) {
-            utils.printExceptions(ex);
+            XUtils.printExceptions(ex);
         } 
 
         jshell.close();

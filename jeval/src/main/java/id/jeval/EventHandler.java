@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import id.xfunction.XUtils;
 import jdk.jshell.Diag;
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
@@ -21,7 +22,6 @@ import jdk.jshell.UnresolvedReferenceException;
 
 public class EventHandler {
 
-    private static Utils utils = new Utils();
     private boolean isScript;
     private JShell jshell;
     private boolean isError = false;
@@ -95,7 +95,7 @@ public class EventHandler {
         if (ex instanceof EvalException) {
             onEvalException((EvalException)ex);
         }
-        utils.printExceptions(ex);
+        XUtils.printExceptions(ex);
     }
     
     private void onUnresolvedReferenceException(UnresolvedReferenceException e) {
