@@ -16,9 +16,7 @@ dependencies {
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
-def projectName = 'jeval'
-def releaseFileName = "${projectName}.zip"
-def releaseDir = "release/$projectName/$projectName"
+def releaseDir = "release/${projectName}/${projectName}"
 
 jar { 
     manifest { 

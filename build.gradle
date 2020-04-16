@@ -5,3 +5,9 @@ allprojects {
 }
 
 version = '17'
+
+ext {
+    version = '17'
+    projectName = 'jeval'
+    releaseFileName = "${projectName}-${version}.zip"
+}

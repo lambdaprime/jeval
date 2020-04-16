@@ -22,14 +22,13 @@ dependencies {
 sourceCompatibility = '1.9'
 targetCompatibility = '1.9'
 
-//String releaseFileName = "jeval-16.zip"
 String testDir = "$buildDir/jeval"
 String testSrcDir = "$projectDir/src/test"
 
 // Gradle has no UnZip task so we reuse Copy for that
 task myTest(type: Copy) {
     mkdir file(testDir)
-    from zipTree("${project.rootDir}/jeval/release/jeval.zip")
+    from zipTree("${project.rootDir}/jeval/release/${releaseFileName}")
     into "$buildDir"
 }
 
