@@ -104,6 +104,7 @@ public class Main {
         
         eventHandler = new EventHandler(jshell);
         jshell.onSnippetEvent(eventHandler::onEvent);
+        jshell.onShutdown(eventHandler::onShutdown);
 
         jshExec = new JshExecutor(jshell);
         preloader(jshExec);

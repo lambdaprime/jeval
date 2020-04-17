@@ -42,6 +42,7 @@ class Y {
     }
 }
 
+Unresolved references: class Z, variable y
 
 Unresolved snippet:
 class X {
@@ -97,6 +98,7 @@ class X2 {
     }
 }
 
+Unresolved references: class X, method m(<nulltype>,<nulltype>)
 
 Unresolved snippet:
 class X1 {
@@ -104,7 +106,9 @@ class X1 {
         m(null, null);
         return null;
     }
-}"
+}
+
+Unresolved references: class X, method m(<nulltype>,<nulltype>)"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
@@ -171,14 +175,21 @@ void f() {
 f();
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="Unresolved references: variable g
-jdk.jshell.UnresolvedReferenceException: Attempt to use definition snippet with unresolved references in MethodSnippet:f/()void-void f() {
-    printf(\"ggg\");
+EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition snippet with unresolved references in MethodSnippet:f/()void-void f() {
+    printf("ggg");
     printf(g);
 }
 
 	at .f(#47:1)
-	at .(#49:1)"
+	at .(#49:1)
+
+Unresolved snippet:
+void f() {
+    printf("ggg");
+    printf(g);
+}
+
+Unresolved references: variable g'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
@@ -219,6 +230,38 @@ fi
 echo "Test 11"
 OUT=$(jeval -e 'out.println(Xml.query("<notes><note><to test=\"ggg1\">Tove</to></note><note><to test=\"ggg2\">Bove</to></note></notes>", "/notes/note/to/@test"))')
 EXPECTED="[ggg1, ggg2]"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+# Test that jeval 
+echo "Test 12"
+cat << EOF > /tmp/r
+void g() {
+    var y = new Exec("ffff")
+        .run();
+}
+Runnable r = () -> {
+    try {
+        g();
+    } catch (Exception e) {
+    }
+};
+var exec = Executors.newSingleThreadExecutor();
+exec.submit(r);
+exec.shutdown();
+exec.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED='
+Unresolved snippet:
+void g() {
+    var y = new Exec("ffff")
+        .run();
+}
+
+Unresolved references: class Exec'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1

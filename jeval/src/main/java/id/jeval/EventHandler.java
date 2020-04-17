@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import id.xfunction.XUtils;
+import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Diag;
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
 import jdk.jshell.JShellException;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
-import jdk.jshell.UnresolvedReferenceException;
 
 public class EventHandler {
 
@@ -54,9 +54,8 @@ public class EventHandler {
             break;
         case REJECTED:
             isError = true;
-            unresolvedSnippets.push(snippet);
-            unresolvedSnippets.stream()
-                .forEach(this::printUnresolvedSnippet);
+            printDiagnostics(snippet);
+            printUnresolvedSnippets();
             break;
         case RECOVERABLE_DEFINED:
         case RECOVERABLE_NOT_DEFINED: {
@@ -68,7 +67,17 @@ public class EventHandler {
         }
     }
 
-    private void printUnresolvedSnippet(Snippet snippet) {
+    public void onShutdown(JShell jshell) {
+        printUnresolvedSnippets();
+    }
+
+    private void printUnresolvedSnippets() {
+        unresolvedSnippets.stream()
+            .forEach(this::printDiagnostics);
+        unresolvedSnippets.clear();
+    }
+
+    private void printDiagnostics(Snippet snippet) {
         String src = snippet.source();
         List<Entry<Long, List<Diag>>> diags = jshell.diagnostics(snippet)
                 .collect(groupingBy(Diag::getStartPosition))
@@ -86,24 +95,22 @@ public class EventHandler {
                 err.println(d.getMessage(null) + "\nat position: " + pos);
             }
         }
+        if (snippet instanceof DeclarationSnippet) {
+            String s = jshell.unresolvedDependencies((DeclarationSnippet)snippet)
+                    .collect(joining(", "));
+            if (!s.isEmpty())
+                err.println("Unresolved references: " + s);
+        }
     }
 
     private void printException(Throwable ex) {
-        if (ex instanceof UnresolvedReferenceException) {
-            onUnresolvedReferenceException((UnresolvedReferenceException)ex);
-        }
         if (ex instanceof EvalException) {
             onEvalException((EvalException)ex);
         }
         XUtils.printExceptions(ex);
     }
     
-    private void onUnresolvedReferenceException(UnresolvedReferenceException e) {
-        out.println("Unresolved references: " + jshell.unresolvedDependencies(e.getSnippet())
-            .collect(joining(", ")));
-    }
-
     private void onEvalException(EvalException e) {
-        out.format("%s %s\n", e.getExceptionClassName(), e.getMessage());
+        err.format("%s %s\n", e.getExceptionClassName(), e.getMessage());
     }
 }
