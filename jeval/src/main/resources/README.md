@@ -1,11 +1,52 @@
+**jeval** - command line Java code interpreter similar to JShell except with **jeval** you can:
 
-**jeval** - command line Java code interpreter. It provides convenient way to use jshell without entering its interactive mode so you can execute Java code straight from the command line. **jeval** allows you to use Java same as you would use perl -e, bash -c, etc. It binds all standard streams to support piping and reading from stdin. With **jeval** you can execute complete Java shell scripts as well.
+- execute Java code straight from the command line (same as you would do with perl -e, bash -c):
+``` bash
+% jeval -e 'out.println("Hello world")'
+Hello world
+```
+With JShell it will look like:
+``` bash
+echo 'System.out.println("Hello world")' | jshell -
+```
+- execute complete Java shell scripts and see compilation errors if any
+``` bash
+% cat test.java
+System.out.println("Hello world");
+% jeval test.java 
+Hello world
+```
+With JShell you would have to use "/exit" in the end (otherwise it will start interactive mode):
+``` bash
+% cat test.java
+System.out.println("Hello world");
+/exit
+% jshell test.java
+Hello world
+```
+And it will not print you any errors:
+``` bash
+% cat test.java
+System.out.println("Hello world");
+error here
+/exit
+% jshell test.java
+Hello world
+```
+- use pipes to pass data to your Java code (**jeval** binds all standard streams to support lazy reading from stdin)
+``` bash
+echo -e "ab\ncd\nef" | jeval -e "stdin.lines().collect(joining(\",\"))"
+```
+For JShell there is no default support of that
+- pass arguments to your Java scripts and handle them in same way as you do it in Java:
+```bash
+$ jeval -e 'format("args %s, %s", args[0], args[1])' "arg1" "arg2"
+"args arg1, arg2"
+```
 
-To execute Java code **jeval** does not require you to write class body with main method and all boilerplate code. You just write Java as you would do it in jshell.
+**jeval** does not require you to write class body with main method and all boilerplate code (but you still can do it if you want). You just write Java as you would do it in JShell.
 
 **jeval** comes with [**xfunction**](https://github.com/lambdaprime/xfunction) library and exports most of it methods to global space.
-
-Version: 17
 
 lambdaprime <id.blackmesa@gmail.com>
 
@@ -47,7 +88,7 @@ jeval [ <JAVA_SCRIPT> | -e <JAVA_SNIPPET> ] [ARGS]
 
 Where: 
 
-JAVA_SCRIPT - Java script file to be executed. I prefer to save jshell scripts with *.java extension so Eclipse will automatically highlight the syntax in them.
+JAVA_SCRIPT - Java script file to be executed. I prefer to save Java scripts with *.java extension so Eclipse will automatically highlight the syntax in them.
 
 JAVA_SNIPPET - Java expression. **jeval** will evaluate the expression and print its result. If you are entering more than one expression please surround JAVA_SNIPPET with "{}". If your snippet contains quotes "" you need to escape them with backslash. In Linux it is enough to enclose the snippet in single quotes ''.
 
@@ -71,6 +112,8 @@ $ JAVA_ARGS="-Dtest=hello -Xmx50m" jeval -e 'System.getProperty("test")'
 ```
 
 ## Default imports
+
+**jeval** by default imports following packages and static methods to the global space so you don't need to worry to import them each time manually:
 
 ```java
 java.util.stream.IntStream.*;
