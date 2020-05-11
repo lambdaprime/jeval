@@ -266,3 +266,73 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
 fi
+
+echo "Test 13"
+cat << EOF > /tmp/r
+/open rr
+EOF
+cat << EOF > /tmp/rr
+/open rrr
+EOF
+cat << EOF > /tmp/rrr
+out.println("ggg");
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="ggg"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 14"
+cat << EOF > /tmp/r
+/open rr
+m();
+EOF
+cat << EOF > /tmp/rr
+void m() {out.println("ggg");}
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="ggg"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 15"
+cat << EOF > /tmp/r
+/open  /tmp/rr
+m();
+EOF
+cat << EOF > /tmp/rr
+void m() {out.println("ggg");}
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="ggg"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 16"
+cat << EOF > /tmp/r
+/open  /tmp/rr
+m();
+EOF
+cat << EOF > /tmp/rr
+void m() {out.println(ggg);}
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition snippet with unresolved references in MethodSnippet:m/()void-void m() {out.println(ggg);}
+
+	at .m(#47:1)
+	at .(#49:1)
+
+Unresolved snippet:
+void m() {out.println(ggg);}
+
+Unresolved references: variable ggg'
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED [$OUT] [$EXPECTED]"
+    exit 1
+fi

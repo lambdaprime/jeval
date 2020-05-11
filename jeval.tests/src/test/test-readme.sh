@@ -113,3 +113,18 @@ if [ "$OUT" != "20" ]; then
     exit 1
 fi
 
+echo "Test 12"
+cat << EOF > /tmp/script.java
+/open parsers.java
+printf(parseToHex(123) + "\n");
+EOF
+cat << EOF > /tmp/parsers.java
+String parseToHex(int num) {
+    return Integer.toHexString(num);
+}
+EOF
+OUT=$(jeval /tmp/script.java 2>&1)
+if [ "$OUT" != "7b" ]; then
+    echo "FAILED 12"
+    exit 1
+fi

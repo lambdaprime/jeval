@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ import jdk.jshell.JShell;
 
 public class Main {
 
+    private static final String OPEN_COMMAND = "/open";
     private static JShell jshell;
     private static JshExecutor jshExec;
     private static EventHandler eventHandler;
@@ -68,12 +70,19 @@ public class Main {
                 .collect(joining(", "))));
     }
     
-    private static void runScript(String file) throws IOException {
+    private static void runScript(Path file) throws IOException {
         eventHandler.setIsScript(true);
-        Files.readAllLines(Paths.get(file))
-            .stream()
-            .filter(l -> !eventHandler.isError())
-            .forEach(jshExec::onNext);
+        List<String> lines = Files.readAllLines(file);
+        for (String line: lines) {
+            if (eventHandler.isError()) break;
+            if (line.startsWith(OPEN_COMMAND)) {
+                Path openFile = Paths.get(line.replaceAll(OPEN_COMMAND + "\\s+(.*)", "$1"));
+                openFile = file.resolveSibling(openFile);
+                runScript(openFile);
+                continue;
+            }
+            jshExec.onNext(line);
+        }
     }
     
     private static void runSnippet(String snippet) {
@@ -128,7 +137,7 @@ public class Main {
                 runnableArgs.add(arg);
                 return true;
             }
-            runnable[0] = curryAccept(Main::runScript, arg);
+            runnable[0] = curryAccept(Main::runScript, Paths.get(arg));
             return true;
         };
         

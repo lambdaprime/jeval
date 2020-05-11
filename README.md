@@ -200,6 +200,26 @@ All input/output goes through stdin/stdout.
 
   Chooses the best available on current JVM way to measure the execution time and returns it in milliseconds.
 
+## Spitting script in multiple files
+
+**jeval** supports "/open" command similar to what JShell provides. For example using that command you can extract some common logic into separate script file so **jeval** will read that:
+
+```bash
+% cat << EOF > /tmp/script.java
+/open parsers.java
+printf(parseToHex(123) + "\n");
+EOF
+% cat << EOF > /tmp/parsers.java
+String parseToHex(int num) {
+    return Integer.toHexString(num);
+}
+EOF
+% jeval /tmp/script.java
+7b
+```
+
+Here in script.java we include parsers.java and then call parseToHex method defined there.
+
 # Examples
 
 ## Say hello to the world:
