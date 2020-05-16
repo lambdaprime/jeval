@@ -6,4 +6,10 @@ JEVAL_PATH=$(dirname "$JEVAL_PATH")
 # this script will only work if user pass classpath through CLASSPATH
 # and not through JAVA_ARGS
 
-java ${JAVA_ARGS} -Xnoclassgc -noverify -cp ${JEVAL_PATH}/jeval.jar:${CLASSPATH} id.jeval.Main "$@"
+if [ -z "${CLASSPATH}" ]; then
+    CLASSPATH="${JEVAL_PATH}/jeval.jar"
+else
+    CLASSPATH="${JEVAL_PATH}/jeval.jar:${CLASSPATH}"
+fi
+
+java ${JAVA_ARGS} -Xnoclassgc -noverify -cp "${CLASSPATH}" id.jeval.Main "$@"
