@@ -32,6 +32,7 @@ class JshExecutor implements Subscriber<String> {
     private boolean isDocumentHere;
     private DocumentHereProcessor documentHere = new DocumentHereProcessor();
     private boolean isExecuted;
+    private boolean isComplete;
     
     public JshExecutor(JShell jshell) {
         this.jshell = jshell;
@@ -40,11 +41,16 @@ class JshExecutor implements Subscriber<String> {
 
     @Override
     public void onComplete() {
+        isComplete = true;
         if (isExecuted) return;
         String snippet = buf.toString();
         jshell.eval(snippet);
     }
 
+    public boolean isComplete() {
+        return isComplete;
+    }
+    
     @Override
     public void onError(Throwable arg0) {
         

@@ -115,7 +115,7 @@ public class Main {
         jshell.onSnippetEvent(eventHandler::onEvent);
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() { 
-                eventHandler.onShutdown(null);
+                eventHandler.onShutdown();
             }
         });
 
@@ -157,9 +157,10 @@ public class Main {
             jshExec.onComplete();
         } catch (Throwable ex) {
             XUtils.printExceptions(ex);
-        } 
+        }
 
         jshell.close();
+        eventHandler.close();
         
         exit(eventHandler.isError()? 1: 0);
     }

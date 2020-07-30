@@ -20,11 +20,12 @@ import jdk.jshell.JShellException;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
 
-public class EventHandler {
+public class EventHandler implements AutoCloseable {
 
     private boolean isScript;
     private JShell jshell;
     private boolean isError = false;
+    private boolean isClosed;
     private LinkedList<Snippet> unresolvedSnippets = new LinkedList<>();
 
     public EventHandler(JShell jshell) {
@@ -67,8 +68,11 @@ public class EventHandler {
         }
     }
 
-    public void onShutdown(JShell jshell) {
-        printUnresolvedSnippets();
+    public void onShutdown() {
+        // when handler is not closed there may be additional snippets whic would resolve errors
+        // so we don't print anything
+        if (isError || isClosed)
+            printUnresolvedSnippets();
     }
 
     private void printUnresolvedSnippets() {
@@ -112,5 +116,10 @@ public class EventHandler {
     
     private void onEvalException(EvalException e) {
         err.format("%s %s\n", e.getExceptionClassName(), e.getMessage());
+    }
+
+    @Override
+    public void close() throws Exception {
+        isClosed = true;
     }
 }

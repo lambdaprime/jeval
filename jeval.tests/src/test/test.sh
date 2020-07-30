@@ -336,3 +336,17 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT] [$EXPECTED]"
     exit 1
 fi
+
+echo "Test 17"
+cat << EOF > /tmp/r
+void m() {
+    lol.test();
+}
+exit(0);
+EOF
+OUT=$(jeval /tmp/r)
+EXPECTED=""
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
