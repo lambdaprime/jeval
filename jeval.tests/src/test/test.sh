@@ -350,3 +350,41 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
 fi
+
+echo "Test 18"
+cat << EOF > /tmp/r
+String calc(String line) {
+    out.println("asdf");
+    return COOKIE;
+}
+
+void writeToFile(String line) {
+
+}
+
+//Usage check.
+if (args.length < 1) {
+    out.println(<<EOF
+
+fff
+EOF);
+    exit(0);
+}
+
+final String COOKIE = "ggggg";
+
+out.println("he");
+
+Stream.of("1")
+	.parallel()
+	.map(l -> calc(l))
+	.map(l -> l.replace(";",","))
+	.forEach(line -> writeToFile(line));
+EOF
+OUT=$(jeval /tmp/r /tmp/r)
+EXPECTED="he
+asdf"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi

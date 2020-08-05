@@ -18,6 +18,7 @@ import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
 import jdk.jshell.JShellException;
 import jdk.jshell.Snippet;
+import jdk.jshell.Snippet.Status;
 import jdk.jshell.SnippetEvent;
 
 public class EventHandler implements AutoCloseable {
@@ -69,7 +70,7 @@ public class EventHandler implements AutoCloseable {
     }
 
     public void onShutdown() {
-        // when handler is not closed there may be additional snippets whic would resolve errors
+        // when handler is not closed there may be additional snippets which would resolve errors
         // so we don't print anything
         if (isError || isClosed)
             printUnresolvedSnippets();
@@ -77,6 +78,7 @@ public class EventHandler implements AutoCloseable {
 
     private void printUnresolvedSnippets() {
         unresolvedSnippets.stream()
+            .filter(s -> jshell.status(s) != Status.VALID)
             .forEach(this::printDiagnostics);
         unresolvedSnippets.clear();
     }
