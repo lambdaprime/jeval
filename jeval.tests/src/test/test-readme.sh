@@ -107,7 +107,7 @@ fi
 
 echo "Test 11"
 rm /tmp/test-*
-OUT=$(jeval -e 'try (var c = new ParallelConsumer(s -> new XExec("touch /tmp/test-" + s).run().getCode())) {XUtils.infiniteRandomStream(12).limit(20).forEach(c);}' && ls /tmp/test-* | wc -l)
+OUT=$(jeval -e 'try (var c = new ParallelConsumer(s -> new XExec("touch /tmp/test-" + s).run().await())) {XUtils.infiniteRandomStream(12).limit(20).forEach(c);}' && ls /tmp/test-* | wc -l)
 if [ "$OUT" != "20" ]; then
     echo "FAILED 11"
     exit 1

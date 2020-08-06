@@ -352,7 +352,7 @@ $ jeval -e 'findMatches("\\d.jpg", "1.jpg 2.png 3.jpg 4.txt 5.txt").forEach(out:
 Here is an example which creates 20 files with random names doing this in parallel on different threads:
 
 ``` bash
-$ jeval -e 'try (var c = new ParallelConsumer(s -> new XExec("touch /tmp/test-" + s).run().getCode())) {XUtils.infiniteRandomStream(12).limit(20).forEach(c);}'
+$ jeval -e 'try (var c = new ParallelConsumer(s -> new XExec("touch /tmp/test-" + s).run().await())) {XUtils.infiniteRandomStream(12).limit(20).forEach(c);}'
 ```
 
 # FAQ
