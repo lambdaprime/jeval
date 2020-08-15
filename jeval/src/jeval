@@ -1,4 +1,12 @@
-JEVAL_PATH=$(readlink -f "$0")
+# User can make a symbolic link to the jeval file
+# In that case JEVAL_PATH should be resolved and
+# point to the original file, otherwise we would
+# not be able to find all jeval libs and jars it
+# depends on
+JEVAL_PATH=$(readlink "$0")
+if [ $? -ne 0 ]; then
+   JEVAL_PATH="$0"
+fi
 JEVAL_PATH=$(dirname "$JEVAL_PATH")
 
 # Java accepts classpath either from -cp or CLASSPATH but not from both
