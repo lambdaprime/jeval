@@ -1,3 +1,7 @@
+#!/bin/bash
+
+#set -x
+
 # User can make a symbolic link to the jeval file
 # In that case JEVAL_PATH should be resolved and
 # point to the original file, otherwise we would
@@ -9,15 +13,25 @@ if [ $? -ne 0 ]; then
 fi
 JEVAL_PATH=$(dirname "$JEVAL_PATH")
 
+# When started under cygwin or MSYS we need to 
+# process classpath in the way that Java on Windows
+# expects it
+CP_SEP=":"
+if [[ "$OS" =~ Windows ]]; then
+    JEVAL_PATH=$(cygpath -d "$JEVAL_PATH")
+    CP_SEP=";"
+fi
+
 # Java accepts classpath either from -cp or CLASSPATH but not from both
 # Because parsing JAVA_ARGS is harder than just prepend to CLASSPATH
 # this script will only work if user pass classpath through CLASSPATH
 # and not through JAVA_ARGS
-
 if [ -z "${CLASSPATH}" ]; then
     CLASSPATH="${JEVAL_PATH}/jeval.jar"
 else
-    CLASSPATH="${JEVAL_PATH}/jeval.jar:${CLASSPATH}"
+    CLASSPATH="${JEVAL_PATH}/jeval.jar${CP_SEP}${CLASSPATH}"
 fi
 
+# We cannot use -jar option because it ignores -cp and $CLASSPATH
+# and we want to let user add new jars to classpath
 java ${JAVA_ARGS} -Xnoclassgc -noverify -cp "${CLASSPATH}" id.jeval.Main "$@"
