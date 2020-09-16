@@ -1,5 +1,7 @@
 package id.jeval;
 
+import static java.util.stream.Collectors.toCollection;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -9,14 +11,18 @@ public class PositionsHighlighter {
     public String highlight(String text, List<Integer> positions) {
         StringBuilder newText = new StringBuilder();
         StringBuilder highlighter = new StringBuilder();
-        boolean flush = false;
+        boolean flushHighlighter = false;
         Queue<Integer> posQueue = new LinkedList<>(positions);
         for (char ch: text.toCharArray()) {
             newText.append(ch);
             if (ch == '\n') {
-                if (flush) {
-                    newText.append(highlighter + "\n");
-                    flush = false;
+                if (flushHighlighter) {
+                    highlighter.append("\n");
+                    newText.append(highlighter);
+                    flushHighlighter = false;
+                    posQueue = posQueue.stream()
+                        .map(pos -> pos + highlighter.length())
+                        .collect(toCollection(LinkedList::new));
                 }
                 highlighter.setLength(0);
             } else {
@@ -24,13 +30,13 @@ public class PositionsHighlighter {
                 if (posQueue.peek() != newText.length() - 1)
                     highlighter.append(' ');
                 else {
-                    flush = true;
+                    flushHighlighter = true;
                     highlighter.append('^');
                     posQueue.remove();
                 }
             }
         }
-        if (flush) {
+        if (flushHighlighter) {
             newText.append('\n');
             newText.append(highlighter);
         }

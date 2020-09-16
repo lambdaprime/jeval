@@ -16,7 +16,8 @@ public class PositionsHighlighterTests {
         return Stream.of(
             List.of("PositionsHighlighter1", List.of(2,3,4)),
             List.of("PositionsHighlighter2", List.of(0,4)),
-            List.of("PositionsHighlighter3", List.of(42))
+            List.of("PositionsHighlighter3", List.of(42)),
+            List.of("PositionsHighlighter4", List.of(7, 41))
         );
     }
     
