@@ -24,7 +24,6 @@ Y y = null;
 EOF
 OUT=$(jeval /tmp/r 2>&1)
 EXPECTED="
-Unresolved snippet:
 Y y = null;
 ^
 
@@ -33,7 +32,6 @@ cannot find symbol
   location: class 
 at position: 0
 
-Unresolved snippet:
 class Y {
     X x;
     static Y c(Z h, List<String> d) {
@@ -44,7 +42,6 @@ class Y {
 
 Unresolved references: class Z, variable y
 
-Unresolved snippet:
 class X {
     static X create() {
         m(null, null);
@@ -81,7 +78,6 @@ Y y = null;
 EOF
 OUT=$(jeval /tmp/r 2>&1)
 EXPECTED="
-Unresolved snippet:
 Y y = null;
 ^
 
@@ -90,7 +86,6 @@ cannot find symbol
   location: class 
 at position: 0
 
-Unresolved snippet:
 class X2 {
     static X create() {
         m(null, null);
@@ -100,7 +95,6 @@ class X2 {
 
 Unresolved references: class X, method m(<nulltype>,<nulltype>)
 
-Unresolved snippet:
 class X1 {
     static X create() {
         m(null, null);
@@ -183,7 +177,6 @@ EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition sni
 	at .f(#47:1)
 	at .(#49:1)
 
-Unresolved snippet:
 void f() {
     printf("ggg");
     printf(g);
@@ -255,7 +248,6 @@ exec.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
 EOF
 OUT=$(jeval /tmp/r 2>&1)
 EXPECTED='
-Unresolved snippet:
 void g() {
     var y = new Exec("ffff")
         .run();
@@ -328,7 +320,6 @@ EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition sni
 	at .m(#47:1)
 	at .(#49:1)
 
-Unresolved snippet:
 void m() {out.println(ggg);}
 
 Unresolved references: variable ggg'
@@ -386,5 +377,30 @@ EXPECTED="he
 asdf"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 19 Don't print unresolved errors if they get resolved later"
+cat << EOF > /tmp/r
+void m(X x) {
+    int i;
+    printf("" + i);
+}
+
+class X {
+}
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="
+void m(X x) {
+    int i;
+    printf(\"\" + i);
+                ^
+}
+
+variable i might not have been initialized
+at position: 41"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED [$OUT]"
     exit 1
 fi

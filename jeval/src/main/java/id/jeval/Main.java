@@ -74,7 +74,6 @@ public class Main {
         eventHandler.setIsScript(true);
         List<String> lines = Files.readAllLines(file);
         for (String line: lines) {
-            if (eventHandler.isError()) break;
             if (line.startsWith(OPEN_COMMAND)) {
                 Path openFile = Paths.get(line.replaceAll(OPEN_COMMAND + "\\s+(.*)", "$1"));
                 openFile = file.resolveSibling(openFile);
@@ -113,11 +112,6 @@ public class Main {
         
         eventHandler = new EventHandler(jshell);
         jshell.onSnippetEvent(eventHandler::onEvent);
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() { 
-                eventHandler.onShutdown();
-            }
-        });
 
         jshExec = new JshExecutor(jshell);
         preloader(jshExec);
@@ -159,8 +153,8 @@ public class Main {
             XUtils.printExceptions(ex);
         }
 
-        jshell.close();
         eventHandler.close();
+        jshell.close();
         
         exit(eventHandler.isError()? 1: 0);
     }

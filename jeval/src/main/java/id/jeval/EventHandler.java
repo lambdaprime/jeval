@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import id.xfunction.XAsserts;
 import id.xfunction.XUtils;
 import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Diag;
@@ -25,10 +26,26 @@ public class EventHandler implements AutoCloseable {
 
     private boolean isScript;
     private JShell jshell;
-    private boolean isError = false;
+    private boolean isError;
     private boolean isClosed;
     private LinkedList<Snippet> unresolvedSnippets = new LinkedList<>();
-
+    
+    /*
+     * When JShell rejects the snippet it means that it has at least one
+     * unrecoverable error.
+     * 
+     * Because other errors may be recoverable we want to show to the
+     * user only unrecoverable ones. That way we will not confuse and
+     * prevent user from trying to fix errors which are not errors at all.
+     * To do that in case of rejected snippet we:
+     * - store it in the list below
+     * - continue processing the source code further in hope to resolve
+     * other recoverable errors in the snippet
+     * 
+     * When jeval terminates we evaluate snippet again and print the errors
+     */
+    private LinkedList<Snippet> rejectedSnippets = new LinkedList<>();
+    
     public EventHandler(JShell jshell) {
         this.jshell = jshell;
     }
@@ -55,9 +72,12 @@ public class EventHandler implements AutoCloseable {
                     out.print(ev.value());
             break;
         case REJECTED:
-            isError = true;
-            printDiagnostics(snippet);
-            printUnresolvedSnippets();
+            if (isClosed) {
+                printDiagnostics(snippet);
+            } else {
+                isError = true;
+                rejectedSnippets.push(snippet);
+            }
             break;
         case RECOVERABLE_DEFINED:
         case RECOVERABLE_NOT_DEFINED: {
@@ -67,13 +87,6 @@ public class EventHandler implements AutoCloseable {
         default:
             break;
         }
-    }
-
-    public void onShutdown() {
-        // when handler is not closed there may be additional snippets which would resolve errors
-        // so we don't print anything
-        if (isError || isClosed)
-            printUnresolvedSnippets();
     }
 
     private void printUnresolvedSnippets() {
@@ -91,7 +104,7 @@ public class EventHandler implements AutoCloseable {
                 .stream()
                 .sorted(Comparator.comparingLong(Entry::getKey))
                 .collect(toList());
-        err.println("\nUnresolved snippet:");
+        err.println();
         err.println(new PositionsHighlighter().highlight(src, diags.stream()
             .map(e -> e.getKey().intValue())
             .collect(toList())));
@@ -123,5 +136,21 @@ public class EventHandler implements AutoCloseable {
     @Override
     public void close() throws Exception {
         isClosed = true;
+        if (isError)
+            rerunRejectedSnippets();
+        printUnresolvedSnippets();
+    }
+
+    /**
+     * We rerun rejected snippets only when handler
+     * was already closed. Doing so if snippet gets
+     * rejected again we just print it diagnostics
+     * immediately and not postpone for later.
+     */
+    private void rerunRejectedSnippets() {
+        XAsserts.assertTrue(isClosed);
+        for (Snippet snippet: rejectedSnippets) {
+            jshell.eval(snippet.source());
+        }
     }
 }
