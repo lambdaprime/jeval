@@ -1,0 +1,4 @@
+void m(X x) {
+		int i;
+	  	printf("" + i);
+}

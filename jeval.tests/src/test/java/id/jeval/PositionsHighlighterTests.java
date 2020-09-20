@@ -14,10 +14,16 @@ public class PositionsHighlighterTests {
 
     static Stream<List> testDataProvider() {
         return Stream.of(
+            // markers on same line
             List.of("PositionsHighlighter1", List.of(2,3,4)),
+            // marker pointing zero
             List.of("PositionsHighlighter2", List.of(0,4)),
+            // one marker
             List.of("PositionsHighlighter3", List.of(42)),
-            List.of("PositionsHighlighter4", List.of(7, 41))
+            // markers on multiple lines
+            List.of("PositionsHighlighter4", List.of(7, 41)),
+            // tabs and spaces
+            List.of("PositionsHighlighter5", List.of(16, 39))
         );
     }
     
