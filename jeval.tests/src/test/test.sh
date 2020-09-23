@@ -380,7 +380,7 @@ if [ "$OUT" != "$EXPECTED" ]; then
     exit 1
 fi
 
-echo "Test 19 Don't print unresolved errors if they get resolved later"
+echo "Test 19 In case of unrecoverable error, print recoverable errors as well"
 cat << EOF > /tmp/r
 void m(X x) {
     int i;
@@ -393,14 +393,49 @@ EOF
 OUT=$(jeval /tmp/r 2>&1)
 EXPECTED="
 void m(X x) {
+       ^     
     int i;
     printf(\"\" + i);
                 ^
 }
 
+cannot find symbol
+  symbol:   class X
+  location: class 
+at position: 7
 variable i might not have been initialized
 at position: 41"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT]"
     exit 1
 fi
+
+echo "Test 20 In case of unrecoverable error fail fast and do not execute further"
+cat << EOF > /tmp/r
+void m(X x) {
+    int i;
+    printf("" + i);
+}
+
+printf("hello");
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED="
+void m(X x) {
+       ^     
+    int i;
+    printf(\"\" + i);
+                ^
+}
+
+cannot find symbol
+  symbol:   class X
+  location: class 
+at position: 7
+variable i might not have been initialized
+at position: 41"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED [$OUT]"
+    exit 1
+fi
+

@@ -74,6 +74,7 @@ public class Main {
         eventHandler.setIsScript(true);
         List<String> lines = Files.readAllLines(file);
         for (String line: lines) {
+            if (eventHandler.isError()) break;
             if (line.startsWith(OPEN_COMMAND)) {
                 Path openFile = Paths.get(line.replaceAll(OPEN_COMMAND + "\\s+(.*)", "$1"));
                 openFile = file.resolveSibling(openFile);
