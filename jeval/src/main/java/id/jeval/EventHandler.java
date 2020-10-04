@@ -83,9 +83,11 @@ public class EventHandler implements AutoCloseable {
                 .sorted(Comparator.comparingLong(Entry::getKey))
                 .collect(toList());
         err.println();
-        err.println(new PositionsHighlighter().highlight(src, diags.stream()
-            .map(e -> e.getKey().intValue())
-            .collect(toList())));
+        err.println(new PositionsHighlighter(src)
+                .withPositions(diags.stream()
+                    .map(e -> e.getKey().intValue())
+                    .collect(toList()))
+                .highlight());
         for (Entry<Long, List<Diag>> e: diags) {
             long pos = e.getKey();
             for (Diag d: e.getValue()) {
