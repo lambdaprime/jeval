@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import id.jeval.highlighter.PositionsHighlighter;
 import id.xfunction.XUtils;
 import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Diag;

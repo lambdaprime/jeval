@@ -1,4 +1,4 @@
-package id.jeval;
+package id.jeval.highlighter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import id.jeval.highlighter.PositionsHighlighter;
 import id.xfunction.XUtils;
 
 public class PositionsHighlighterTests {
@@ -23,7 +24,9 @@ public class PositionsHighlighterTests {
             // markers on multiple lines
             List.of("PositionsHighlighter4", List.of(7, 41)),
             // tabs and spaces
-            List.of("PositionsHighlighter5", List.of(16, 39))
+            List.of("PositionsHighlighter5", List.of(16, 39)),
+            // silent mode
+            List.of("PositionsHighlighter6", List.of(16, 39), true)
         );
     }
     
@@ -32,8 +35,11 @@ public class PositionsHighlighterTests {
     public void test(List data) {
         String text = XUtils.readResource(data.get(0) + ".in");
         String expected = XUtils.readResource(data.get(0) + ".out");
-        assertEquals(expected, new PositionsHighlighter(text)
-            .withPositions((List<Integer>)data.get(1))
+        boolean isSilent = data.size() < 3? false: (Boolean)data.get(2);
+        PositionsHighlighter highlighter = new PositionsHighlighter(text)
+                .withPositions((List<Integer>)data.get(1));
+        if (isSilent) highlighter.withSilentMode();
+        assertEquals(expected, highlighter
             .highlight());
     }
 }
