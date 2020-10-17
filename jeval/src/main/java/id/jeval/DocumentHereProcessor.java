@@ -15,6 +15,8 @@
  */
 package id.jeval;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,9 +54,14 @@ class DocumentHereProcessor {
     }
     
     private String makeLiteral() {
-        String str = documentHere.stream()
+        if (documentHere.isEmpty()) return "";
+        List<String> lines = documentHere.stream()
             .map(s -> s.toString().replace("\"", "\\\""))
-            .collect(Collectors.joining("\\n"));
-        return "\"" + str + "\"";
+            .collect(toList());
+        String str = lines.subList(0, lines.size() - 1).stream()
+                .map(s -> String.format("\"%s\\n\" +\n", s))
+                .collect(Collectors.joining());
+        str += String.format("\"%s\"", lines.get(lines.size() - 1));
+        return str;
     }
 }
