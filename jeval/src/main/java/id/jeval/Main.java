@@ -59,8 +59,10 @@ public class Main {
         eventHandler.setIsScript(true);
         Scanner scanner = new Scanner(Main.class.getResource("/preloader.jsh").openStream())
                 .useDelimiter("\n");
-        while (scanner.hasNext())
+        while (scanner.hasNext()) {
+            eventHandler.onNextLine(Paths.get("preloader.jsh"));
             jshExec.onNext(scanner.next());
+        }
     }
     
     private static void defineArgs(JshExecutor jshExec, List<String> args) {
@@ -75,6 +77,7 @@ public class Main {
         List<String> lines = Files.readAllLines(file);
         for (String line: lines) {
             if (eventHandler.isError()) break;
+            eventHandler.onNextLine(file);
             if (line.startsWith(OPEN_COMMAND)) {
                 Path openFile = Paths.get(line.replaceAll(OPEN_COMMAND + "\\s+(.*)", "$1"));
                 openFile = file.resolveSibling(openFile);
@@ -87,6 +90,7 @@ public class Main {
     
     private static void runSnippet(String snippet) {
         eventHandler.setIsScript(false);
+        eventHandler.onNextLine(Paths.get(""));
         jshExec.onNext(snippet);
     }
     

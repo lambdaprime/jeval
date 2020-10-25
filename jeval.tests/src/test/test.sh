@@ -23,38 +23,22 @@ String m() {
 Y y = null;
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="
+EXPECTED="/tmp/r: 17: cannot find symbol
+  symbol:   class Y
+  location: class 
 Y y = null;
 ^
 
-cannot find symbol
-  symbol:   class Y
-  location: class 
-at position: 0
+/tmp/r: Unresolved symbol in the snippet starting at line 7: class Z
 
-class Y {
-    X x;
-    static Y c(Z h, List<String> d) {
-        if (y != null) return y;
-        return null;
-    }
-}
+/tmp/r: Unresolved symbol in the snippet starting at line 7: variable y
 
-Unresolved references: class Z, variable y
-
-class X {
-    static X create() {
-        m(null, null);
-        ^
-        return null;
-    }
-}
-
-method m in class  cannot be applied to given types;
+/tmp/r: 3: method m in class  cannot be applied to given types;
   required: no arguments
   found: <nulltype>,<nulltype>
   reason: actual and formal argument lists differ in length
-at position: 42"
+        m(null, null);
+        ^"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
@@ -77,32 +61,19 @@ class X2 {
 Y y = null;
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="
+EXPECTED="/tmp/r: 13: cannot find symbol
+  symbol:   class Y
+  location: class 
 Y y = null;
 ^
 
-cannot find symbol
-  symbol:   class Y
-  location: class 
-at position: 0
+/tmp/r: Unresolved symbol in the snippet starting at line 7: class X
 
-class X2 {
-    static X create() {
-        m(null, null);
-        return null;
-    }
-}
+/tmp/r: Unresolved symbol in the snippet starting at line 7: method m(<nulltype>,<nulltype>)
 
-Unresolved references: class X, method m(<nulltype>,<nulltype>)
+/tmp/r: Unresolved symbol in the snippet starting at line 1: class X
 
-class X1 {
-    static X create() {
-        m(null, null);
-        return null;
-    }
-}
-
-Unresolved references: class X, method m(<nulltype>,<nulltype>)"
+/tmp/r: Unresolved symbol in the snippet starting at line 1: method m(<nulltype>,<nulltype>)"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
@@ -176,13 +147,7 @@ EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition sni
 
 	at .f(#47:1)
 	at .(#49:1)
-
-void f() {
-    printf("ggg");
-    printf(g);
-}
-
-Unresolved references: variable g'
+/tmp/r: Unresolved symbol in the snippet starting at line 1: variable g'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
@@ -247,13 +212,7 @@ exec.shutdown();
 exec.awaitTermination(Integer.MAX_VALUE, TimeUnit.DAYS);
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED='
-void g() {
-    var y = new Exec("ffff")
-        .run();
-}
-
-Unresolved references: class Exec'
+EXPECTED='/tmp/r: Unresolved symbol in the snippet starting at line 1: class Exec'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
@@ -319,10 +278,7 @@ EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition sni
 
 	at .m(#47:1)
 	at .(#49:1)
-
-void m() {out.println(ggg);}
-
-Unresolved references: variable ggg'
+/tmp/rr: Unresolved symbol in the snippet starting at line 1: variable ggg'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT] [$EXPECTED]"
     exit 1
@@ -391,20 +347,15 @@ class X {
 }
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="
-void m(X x) {
-       ^     
-    int i;
-    printf(\"\" + i);
-                ^
-}
-
-cannot find symbol
+EXPECTED='/tmp/r: 1: cannot find symbol
   symbol:   class X
   location: class 
-at position: 7
-variable i might not have been initialized
-at position: 41"
+void m(X x) {
+       ^
+
+/tmp/r: 3: variable i might not have been initialized
+    printf("" + i);
+                ^'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT]"
     exit 1
@@ -420,22 +371,45 @@ void m(X x) {
 printf("hello");
 EOF
 OUT=$(jeval /tmp/r 2>&1)
-EXPECTED="
-void m(X x) {
-       ^     
-    int i;
-    printf(\"\" + i);
-                ^
-}
-
-cannot find symbol
+EXPECTED='/tmp/r: 1: cannot find symbol
   symbol:   class X
   location: class 
-at position: 7
-variable i might not have been initialized
-at position: 41"
+void m(X x) {
+       ^
+
+/tmp/r: 3: variable i might not have been initialized
+    printf("" + i);
+                ^'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT]"
     exit 1
 fi
 
+echo "Test 21 Unresolved snippet position ignores blank lines"
+cat << EOF > /tmp/r
+
+
+
+void m() {
+     printf(x);
+}
+EOF
+OUT=$(jeval /tmp/r 2>&1)
+EXPECTED='/tmp/r: Unresolved symbol in the snippet starting at line 4: variable x'
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED [$OUT]"
+    exit 1
+fi
+
+# Test multiple arguments are available from args
+echo "Test 22 Error output with -e"
+OUT=$(jeval -e 'pr' 2>&1)
+EXPECTED=': 1: cannot find symbol
+  symbol:   variable pr
+  location: class 
+pr
+^'
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED [$OUT]"
+    exit 1
+fi

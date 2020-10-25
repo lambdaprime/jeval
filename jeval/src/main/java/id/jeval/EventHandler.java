@@ -3,15 +3,16 @@ package id.jeval;
 import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-import java.util.Comparator;
+import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 
-import id.jeval.highlighter.PositionsHighlighter;
+import id.jeval.analysis.LineCounter;
+import id.jeval.analysis.SnippetAnalyzer;
+import id.jeval.analysis.SnippetDetails;
 import id.xfunction.XUtils;
 import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Diag;
@@ -27,7 +28,8 @@ public class EventHandler implements AutoCloseable {
     private boolean isScript;
     private JShell jshell;
     private boolean isError;
-    private LinkedList<Snippet> unresolvedSnippets = new LinkedList<>();
+    private LineCounter lineCounter = new LineCounter();
+    private LinkedList<SnippetDetails> unresolvedSnippets = new LinkedList<>();
 
     public EventHandler(JShell jshell) {
         this.jshell = jshell;
@@ -48,6 +50,8 @@ public class EventHandler implements AutoCloseable {
             printException(ex);
         }
         Snippet snippet = ev.snippet();
+        SnippetDetails details = new SnippetDetails(snippet, lineCounter.getCurrentFile(),
+            lineCounter.getCurrentLine());
         switch (ev.status()) {
         case VALID:
             if (ev.value() != null)
@@ -56,11 +60,11 @@ public class EventHandler implements AutoCloseable {
             break;
         case REJECTED:
             isError = true;
-            printDiagnostics(snippet);
+            printDiagnostics(details);
             break;
         case RECOVERABLE_DEFINED:
         case RECOVERABLE_NOT_DEFINED: {
-            unresolvedSnippets.push(snippet);
+            unresolvedSnippets.push(details);
             break;
         }
         default:
@@ -70,36 +74,21 @@ public class EventHandler implements AutoCloseable {
 
     private void printUnresolvedSnippets() {
         unresolvedSnippets.stream()
-            .filter(s -> jshell.status(s) != Status.VALID)
+            .filter(s -> jshell.status(s.getSnippet()) != Status.VALID)
             .forEach(this::printDiagnostics);
         unresolvedSnippets.clear();
     }
 
-    private void printDiagnostics(Snippet snippet) {
-        String src = snippet.source();
-        List<Entry<Long, List<Diag>>> diags = jshell.diagnostics(snippet)
-                .collect(groupingBy(Diag::getStartPosition))
-                .entrySet()
-                .stream()
-                .sorted(Comparator.comparingLong(Entry::getKey))
-                .collect(toList());
-        err.println();
-        err.println(new PositionsHighlighter(src)
-                .withPositions(diags.stream()
-                    .map(e -> e.getKey().intValue())
-                    .collect(toList()))
-                .highlight());
-        for (Entry<Long, List<Diag>> e: diags) {
-            long pos = e.getKey();
-            for (Diag d: e.getValue()) {
-                err.println(d.getMessage(null) + "\nat position: " + pos);
-            }
-        }
+    private void printDiagnostics(SnippetDetails snippetDetails) {
+        Snippet snippet = snippetDetails.getSnippet();
+        Map<Long, List<Diag>> diags = jshell.diagnostics(snippet)
+                .collect(groupingBy(Diag::getStartPosition));
+        SnippetAnalyzer analyzer = new SnippetAnalyzer(snippetDetails);
+        analyzer.printDiagnostics(diags);
         if (snippet instanceof DeclarationSnippet) {
-            String s = jshell.unresolvedDependencies((DeclarationSnippet)snippet)
-                    .collect(joining(", "));
-            if (!s.isEmpty())
-                err.println("Unresolved references: " + s);
+            List<String> s = jshell.unresolvedDependencies((DeclarationSnippet)snippet)
+                    .collect(toList());
+            analyzer.printUnresolvedDependencies(s);
         }
     }
 
@@ -117,6 +106,10 @@ public class EventHandler implements AutoCloseable {
     @Override
     public void close() throws Exception {
         printUnresolvedSnippets();
+    }
+
+    public void onNextLine(Path file) {
+        lineCounter.nextLine(file);
     }
 
 }
