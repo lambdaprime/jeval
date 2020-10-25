@@ -29,6 +29,7 @@ import id.xfunction.*;
 import id.xfunction.function.*;
 import id.xfunction.net.*;
 import static id.xfunction.CommandLineInterface.*;
+import static id.xfunction.XAsserts.*;
 
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
 
@@ -159,12 +160,4 @@ Stream<String> findMatches(String regexp, String str) {
 
 void error(String msg) {
     throw new RuntimeException(msg);
-}
-
-void assertTrue(boolean expr) {
-    if (!expr) error("Assertion error");
-}
-
-void assertTrue(boolean expr, String msg) {
-    if (!expr) error(msg);
 }
