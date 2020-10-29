@@ -131,3 +131,7 @@ var request = HttpRequest.newBuilder()
     .build();
 var response = client.send(request, BodyHandlers.ofString());
 out.println(response.body());
+
+var lines = List.of("1");
+lines = lines.stream()
+    .collect(toList());

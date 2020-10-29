@@ -74,11 +74,7 @@ class JshExecutor implements Subscriber<String> {
         String src = buf.toString();
         if (srcAnalysis.analyzeCompletion(src).completeness() != COMPLETE)
             return;
-        boolean isTmpExpression = srcAnalysis.sourceToSnippets(src).stream()
-            .map(s -> s.subKind())
-            .filter(Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND::equals)
-            .findFirst().isPresent();
-        if (!isTmpExpression || src.trim().endsWith(";")) {
+        if (src.trim().endsWith(";") || src.trim().endsWith("}")) {
             buf.setLength(0);
             jshell.eval(src);
             isExecuted = true;
