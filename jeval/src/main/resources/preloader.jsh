@@ -161,3 +161,7 @@ Stream<String> findMatches(String regexp, String str) {
 void error(String msg) {
     throw new RuntimeException(msg);
 }
+
+int rand(int m) {
+    return (int)(Math.random() * m);
+}
