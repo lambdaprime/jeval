@@ -68,27 +68,6 @@ rangeClosed(10, 10)
     
 out.println("args: " + Arrays.toString(args));
 
-Runnable r = () -> {
-    try {
-        Thread.sleep(100);
-    } catch (InterruptedException e) {}
-};
-
-long l = new Microprofiler().measureRealTime(r);
-out.println(l >= 100);
-
-l = new Microprofiler().measureUserCpuTime(r);
-out.println(l == 0);
-
-l = new Microprofiler().measureUserCpuTime(() -> {
-    String s = "";
-    for (int i = 0; i < 1000; i++) {
-        s += "x";
-    }
-    out.println(s);
-});
-out.println(l > 0);
-
 new XExec("curl", "-L", "-G", "http://google.com")
     .run()
     .stdout()
