@@ -113,3 +113,15 @@ void error(String msg) {
 int rand(int m) {
     return (int)(Math.random() * m);
 }
+
+String read() {
+    return cli.read();
+}
+
+int readInt() {
+    return cli.readInt();
+}
+
+void waitPressEnter() {
+    cli.waitPressEnter();
+}
