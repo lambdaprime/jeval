@@ -13,7 +13,6 @@ import java.util.Map;
 import id.jeval.analysis.LineCounter;
 import id.jeval.analysis.SnippetAnalyzer;
 import id.jeval.analysis.SnippetDetails;
-import id.xfunction.XUtils;
 import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Diag;
 import jdk.jshell.EvalException;
@@ -96,7 +95,7 @@ public class EventHandler implements AutoCloseable {
         if (ex instanceof EvalException) {
             onEvalException((EvalException)ex);
         }
-        XUtils.printExceptions(ex);
+        ex.printStackTrace();
     }
     
     private void onEvalException(EvalException e) {

@@ -35,7 +35,7 @@ import java.util.function.Function;
 
 import static java.util.Arrays.stream;
 
-import id.xfunction.XUtils;
+import id.xfunction.SmartArgs;
 import id.xfunction.function.ThrowingRunnable;
 import jdk.jshell.JShell;
 
@@ -155,7 +155,7 @@ public class Main {
             runnable[0].run();
             jshExec.onComplete();
         } catch (Throwable ex) {
-            XUtils.printExceptions(ex);
+            ex.printStackTrace();
         }
 
         eventHandler.close();
