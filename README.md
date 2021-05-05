@@ -23,4 +23,4 @@ http://portal2.atwebpages.com/jeval/
 You can download **jeval** from <https://github.com/lambdaprime/jeval/releases>
 
 
-lambdaprime <id.blackmesa@gmail.com>
+lambdaprime <intid@protonmail.com>
