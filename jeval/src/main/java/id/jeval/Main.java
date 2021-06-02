@@ -15,6 +15,7 @@
  */
 package id.jeval;
 
+import static id.jeval.commands.CommandConstants.OPEN_COMMAND;
 import static id.xfunction.function.Curry.curryAccept;
 import static java.lang.System.err;
 import static java.lang.System.exit;
@@ -27,21 +28,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static java.util.Arrays.stream;
-
+import id.jeval.commands.DependencyResolver;
+import id.jeval.commands.OpenScripts;
+import id.xfunction.ArgumentParsingException;
 import id.xfunction.SmartArgs;
 import id.xfunction.function.ThrowingRunnable;
+import id.xfunction.function.Unchecked;
 import jdk.jshell.JShell;
 
 public class Main {
 
-    private static final String OPEN_COMMAND = "/open";
+    private static final String CLASSPATH_SEP = System.getProperty("path.separator", ":");
     private static JShell jshell;
     private static JshExecutor jshExec;
     private static EventHandler eventHandler;
@@ -75,19 +79,19 @@ public class Main {
     private static void runScript(Path file) throws IOException {
         eventHandler.setIsScript(true);
         List<String> lines = Files.readAllLines(file);
+        OpenScripts opener = new OpenScripts();
         for (String line: lines) {
             if (eventHandler.isError()) break;
             eventHandler.onNextLine(file);
             if (line.startsWith(OPEN_COMMAND)) {
-                Path openFile = Paths.get(line.replaceAll(OPEN_COMMAND + "\\s+(.*)", "$1"));
-                openFile = file.resolveSibling(openFile);
+                Path openFile = opener.open(file, line);
                 runScript(openFile);
                 continue;
             }
             jshExec.onNext(line);
         }
     }
-    
+
     private static void runSnippet(String snippet) {
         eventHandler.setIsScript(false);
         eventHandler.onNextLine(Paths.get(""));
@@ -100,7 +104,40 @@ public class Main {
             exit(1);
         }
 
-        String classPath = buildClassPath();
+        List<String> classPathList = toClasspathList(System.getProperty("java.class.path", ""));
+
+        ThrowingRunnable<Exception>[] runnable = new ThrowingRunnable[1];
+        List<String> runnableArgs = new ArrayList<>();
+        Map<String, Consumer<String>> handlers = Map.of(
+            "-e", snippet -> runnable[0] = curryAccept(Main::runSnippet, snippet),
+            "-classpath", cp -> classPathList.addAll(toClasspathList(cp)));
+        Function<String, Boolean> defaultHandler = arg -> {
+            if (runnable[0] != null) {
+                // if we set the runnable already we can start
+                // populate the args
+                runnableArgs.add(arg);
+                return true;
+            }
+            Path scriptPath = Paths.get(arg);
+            Unchecked.run(() -> classPathList.addAll(new DependencyResolver().resolve(scriptPath)));
+            runnable[0] = curryAccept(Main::runScript, scriptPath);
+            return true;
+        };
+        
+        try
+        {
+            new SmartArgs(handlers, defaultHandler).parse(args);
+            if (runnable[0] == null) throw new Exception();
+        } catch (ArgumentParsingException e) {
+            usage();
+            exit(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            exit(1);
+        }
+
+        String classPath = toClasspath(classPathList);
+
         jshell = JShell.builder()
             .out(out)
             .in(in)
@@ -120,34 +157,6 @@ public class Main {
 
         jshExec = new JshExecutor(jshell);
         preloader(jshExec);
-
-        ThrowingRunnable<Exception>[] runnable = new ThrowingRunnable[1];
-        Map<String, Consumer<String>> handlers = Map.of(
-            "-e", snippet -> runnable[0] = curryAccept(Main::runSnippet, snippet),
-            "-classpath", cp -> stream(cp.split(":"))
-                .forEach(jshell::addToClasspath)
-        );
-
-        List<String> runnableArgs = new ArrayList<>();
-        Function<String, Boolean> defaultHandler = arg -> {
-            if (runnable[0] != null) {
-                // if we set the runnable already we can start
-                // populate the args
-                runnableArgs.add(arg);
-                return true;
-            }
-            runnable[0] = curryAccept(Main::runScript, Paths.get(arg));
-            return true;
-        };
-        
-        try
-        {
-            new SmartArgs(handlers, defaultHandler).parse(args);
-            if (runnable[0] == null) throw new Exception();
-        } catch (Exception e) {
-            usage();
-            exit(1);
-        }
         
         defineArgs(jshExec, runnableArgs);
         
@@ -164,8 +173,14 @@ public class Main {
         exit(eventHandler.isError()? 1: 0);
     }
 
-    private static String buildClassPath() {
-        return System.getProperty("java.class.path");
+    private static String toClasspath(List<String> classPathList) {
+        return classPathList.stream()
+                .collect(joining(CLASSPATH_SEP));
+    }
+
+    private static List<String> toClasspathList(String classpath) {
+        return new ArrayList<>(Arrays.asList(classpath
+            .split(CLASSPATH_SEP)));
     }
 
     public static void main(String[] args) throws Exception {

@@ -413,3 +413,36 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT]"
     exit 1
 fi
+
+echo "Test 23 Validate //dependency command"
+cat << EOF > /tmp/r
+//dependency org.yaml:snakeyaml:1.21
+import org.yaml.snakeyaml.*;
+Yaml yaml = new Yaml();
+String document = "\n- Hesperiidae\n- Papilionidae\n- Apatelodidae\n- Epiplemidae";
+List<String> list = (List<String>) yaml.load(document);
+System.out.println(list);
+EOF
+OUT=$(jeval /tmp/r)
+EXPECTED="[Hesperiidae, Papilionidae, Apatelodidae, Epiplemidae]"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 23 Validate //dependency command with //open"
+cat << EOF > /tmp/l
+/open /tmp/r
+import org.yaml.snakeyaml.*;
+Yaml yaml2 = new Yaml();
+String document = "\n- hello\n- world";
+List<String> list = (List<String>) yaml2.load(document);
+System.out.println(list);
+EOF
+OUT=$(jeval /tmp/l)
+EXPECTED="[Hesperiidae, Papilionidae, Apatelodidae, Epiplemidae]
+[hello, world]"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
