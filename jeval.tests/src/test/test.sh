@@ -220,10 +220,10 @@ fi
 
 echo "Test 13"
 cat << EOF > /tmp/r
-/open rr
+//open rr
 EOF
 cat << EOF > /tmp/rr
-/open rrr
+//open rrr
 EOF
 cat << EOF > /tmp/rrr
 out.println("ggg");
@@ -237,7 +237,7 @@ fi
 
 echo "Test 14"
 cat << EOF > /tmp/r
-/open rr
+//open rr
 m();
 EOF
 cat << EOF > /tmp/rr
@@ -252,7 +252,7 @@ fi
 
 echo "Test 15"
 cat << EOF > /tmp/r
-/open  /tmp/rr
+//open  /tmp/rr
 m();
 EOF
 cat << EOF > /tmp/rr
@@ -267,7 +267,7 @@ fi
 
 echo "Test 16"
 cat << EOF > /tmp/r
-/open  /tmp/rr
+//open  /tmp/rr
 m();
 EOF
 cat << EOF > /tmp/rr
@@ -432,7 +432,7 @@ fi
 
 echo "Test 23 Validate //dependency command with //open"
 cat << EOF > /tmp/l
-/open /tmp/r
+//open /tmp/r
 import org.yaml.snakeyaml.*;
 Yaml yaml2 = new Yaml();
 String document = "\n- hello\n- world";

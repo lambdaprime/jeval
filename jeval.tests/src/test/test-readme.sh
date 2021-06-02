@@ -115,7 +115,7 @@ fi
 
 echo "Test 12"
 cat << EOF > /tmp/script.java
-/open parsers.java
+//open parsers.java
 printf(parseToHex(123) + "\n");
 EOF
 cat << EOF > /tmp/parsers.java
