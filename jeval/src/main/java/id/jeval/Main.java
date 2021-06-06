@@ -40,6 +40,7 @@ import id.jeval.commands.DependencyResolver;
 import id.jeval.commands.OpenScripts;
 import id.xfunction.ArgumentParsingException;
 import id.xfunction.SmartArgs;
+import id.xfunction.XUtils;
 import id.xfunction.function.ThrowingRunnable;
 import id.xfunction.function.Unchecked;
 import jdk.jshell.JShell;
@@ -51,7 +52,7 @@ public class Main {
     private static JShell jshell;
     private static JshExecutor jshExec;
     private static EventHandler eventHandler;
-    private static Optional<Path> scriptPathOpt = Optional.empty();
+    private static Optional<Path> scriptPath = Optional.empty();
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
@@ -75,10 +76,16 @@ public class Main {
     private static void defineArgs(JshExecutor jshExec, List<String> args) {
         jshExec.onNext(String.format("args = new String[]{%s};", 
             args.stream()
-                .map(s -> "\"" + s + "\"")
+                .map(XUtils::quote)
                 .collect(joining(", "))));
     }
     
+    private static void defineScriptPath(JshExecutor jshExec) {
+        scriptPath.ifPresent(path -> {
+            jshExec.onNext(String.format("scriptPath = Optional.of(Paths.get(%s));", 
+                XUtils.quote(path.toString())));});
+    }
+
     private static void runScript(Path file) throws IOException {
         eventHandler.setIsScript(true);
         List<String> lines = Files.readAllLines(file);
@@ -121,10 +128,10 @@ public class Main {
                 runnableArgs.add(arg);
                 return true;
             }
-            Path scriptPath = Paths.get(arg);
-            scriptPathOpt = Optional.of(scriptPath);
-            Unchecked.run(() -> classPathList.addAll(new DependencyResolver().resolve(scriptPath)));
-            runnable[0] = curryAccept(Main::runScript, scriptPath);
+            Path path = Paths.get(arg);
+            scriptPath = Optional.of(path.toAbsolutePath());
+            Unchecked.run(() -> classPathList.addAll(new DependencyResolver().resolve(path)));
+            runnable[0] = curryAccept(Main::runScript, path);
             return true;
         };
         
@@ -163,6 +170,7 @@ public class Main {
         preloader(jshExec);
         
         defineArgs(jshExec, runnableArgs);
+        defineScriptPath(jshExec);
         
         try {
             runnable[0].run();
