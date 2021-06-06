@@ -4,10 +4,10 @@ allprojects {
     }
 }
 
-version = '21'
+version = '22'
 
 ext {
-    version = '21'
+    version = '22'
     projectName = 'jeval'
     releaseFileName = "${projectName}-${version}.zip"
 }
