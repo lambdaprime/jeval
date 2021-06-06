@@ -291,7 +291,7 @@ void m() {
 }
 exit(0);
 EOF
-OUT=$(jeval /tmp/r)
+OUT=$(jeval /tmp/r 2>&1)
 EXPECTED=""
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
@@ -423,7 +423,7 @@ String document = "\n- Hesperiidae\n- Papilionidae\n- Apatelodidae\n- Epiplemida
 List<String> list = (List<String>) yaml.load(document);
 System.out.println(list);
 EOF
-OUT=$(jeval /tmp/r)
+OUT=$(jeval /tmp/r 2>&1)
 EXPECTED="[Hesperiidae, Papilionidae, Apatelodidae, Epiplemidae]"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
@@ -439,7 +439,7 @@ String document = "\n- hello\n- world";
 List<String> list = (List<String>) yaml2.load(document);
 System.out.println(list);
 EOF
-OUT=$(jeval /tmp/l)
+OUT=$(jeval /tmp/l 2>&1)
 EXPECTED="[Hesperiidae, Papilionidae, Apatelodidae, Epiplemidae]
 [hello, world]"
 if [ "$OUT" != "$EXPECTED" ]; then

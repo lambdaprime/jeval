@@ -125,6 +125,6 @@ String parseToHex(int num) {
 EOF
 OUT=$(jeval /tmp/script.java 2>&1)
 if [ "$OUT" != "7b" ]; then
-    echo "FAILED 12"
+    echo "FAILED $OUT"
     exit 1
 fi

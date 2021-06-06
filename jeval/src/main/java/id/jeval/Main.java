@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -42,6 +43,7 @@ import id.xfunction.SmartArgs;
 import id.xfunction.function.ThrowingRunnable;
 import id.xfunction.function.Unchecked;
 import jdk.jshell.JShell;
+import jdk.jshell.JShell.Builder;
 
 public class Main {
 
@@ -49,6 +51,7 @@ public class Main {
     private static JShell jshell;
     private static JshExecutor jshExec;
     private static EventHandler eventHandler;
+    private static Optional<Path> scriptPathOpt = Optional.empty();
     
     @SuppressWarnings("resource")
     private static void usage() throws IOException {
@@ -119,6 +122,7 @@ public class Main {
                 return true;
             }
             Path scriptPath = Paths.get(arg);
+            scriptPathOpt = Optional.of(scriptPath);
             Unchecked.run(() -> classPathList.addAll(new DependencyResolver().resolve(scriptPath)));
             runnable[0] = curryAccept(Main::runScript, scriptPath);
             return true;
@@ -137,18 +141,18 @@ public class Main {
         }
 
         String classPath = toClasspath(classPathList);
-
-        jshell = JShell.builder()
+        Builder jshellBuilder = JShell.builder()
             .out(out)
             .in(in)
             .err(err)
-            .executionEngine("local")
+            .executionEngine("local") // LocalExecutionControlProvider
             .compilerOptions("-g:none",
                 "-implicit:none",
                 "-proc:none",
                 "-cp", classPath,
-                "--add-modules", "ALL-MODULE-PATH")
-            .build();
+                "--add-modules", "ALL-MODULE-PATH");
+
+        jshell = jshellBuilder.build();
 
         jshell.addToClasspath(classPath);
         
