@@ -98,6 +98,12 @@ void sleep(long msec) {
 
 String[] args = new String[0];
 
+/**
+ * When user specifies execution script its path will
+ * be available here.
+ */
+Optional<Path> scriptPath = Optional.empty();
+
 void printf(String s, String...fmt) {
     out.print(String.format(s, fmt));
 }
