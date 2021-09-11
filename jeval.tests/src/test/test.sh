@@ -145,8 +145,8 @@ EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition sni
     printf(g);
 }
 
-	at .f(#50:1)
-	at .(#51:1)
+	at .f(#59:1)
+	at .(#60:1)
 /tmp/r: Unresolved symbol in the snippet starting at line 1: variable g'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
@@ -276,8 +276,8 @@ EOF
 OUT=$(jeval /tmp/r 2>&1)
 EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition snippet with unresolved references in MethodSnippet:m/()void-void m() {out.println(ggg);}
 
-	at .m(#50:1)
-	at .(#51:1)
+	at .m(#59:1)
+	at .(#60:1)
 /tmp/rr: Unresolved symbol in the snippet starting at line 1: variable ggg'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT] [$EXPECTED]"

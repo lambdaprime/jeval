@@ -7,16 +7,16 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import id.jeval.analysis.SnippetFileNavigator;
-import id.xfunction.XUtils;
+import id.xfunction.ResourceUtils;
 
 public class SnippetFileNavigatorTest {
 
+    private ResourceUtils utils = new ResourceUtils();
     private SnippetFileNavigator navigator;
 
     @BeforeEach
     public void setup() {
-        String snippet = XUtils.readResource("snippet");
+        String snippet = utils.readResource("snippet");
         navigator = new SnippetFileNavigator(Paths.get("/tmp/r"), 6, snippet);
     }
 

@@ -8,11 +8,12 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import id.jeval.highlighter.PositionsHighlighter;
-import id.xfunction.XUtils;
+import id.xfunction.ResourceUtils;
 
 public class PositionsHighlighterTests {
 
+    private ResourceUtils utils = new ResourceUtils();
+    
     static Stream<List> testDataProvider() {
         return Stream.of(
             // markers on same line
@@ -33,8 +34,8 @@ public class PositionsHighlighterTests {
     @ParameterizedTest
     @MethodSource("testDataProvider")
     public void test(List data) {
-        String text = XUtils.readResource(data.get(0) + ".in");
-        String expected = XUtils.readResource(data.get(0) + ".out");
+        String text = utils.readResource(data.get(0) + ".in");
+        String expected = utils.readResource(data.get(0) + ".out");
         boolean isSilent = data.size() < 3? false: (Boolean)data.get(2);
         PositionsHighlighter highlighter = new PositionsHighlighter(text)
                 .withPositions((List<Integer>)data.get(1));

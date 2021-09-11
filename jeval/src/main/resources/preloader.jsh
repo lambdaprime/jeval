@@ -24,11 +24,24 @@ import java.net.http.*;
 import java.net.http.HttpResponse.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
+import java.time.*;
+import java.time.format.*;
 
 import id.xfunction.*;
+import id.xfunction.cli.*;
+import id.xfunction.concurrent.*;
 import id.xfunction.function.*;
+import id.xfunction.io.*;
+import id.xfunction.lang.*;
+import id.xfunction.logging.*;
 import id.xfunction.net.*;
-import static id.xfunction.CommandLineInterface.*;
+import id.xfunction.nio.file.*;
+import id.xfunction.text.*;
+import id.xfunction.util.*;
+import id.xfunction.util.stream.*;
+
+import static id.xfunction.cli.CommandLineInterface.*;
+import static id.xfunction.net.XHttpClient.*;
 import static id.xfunction.XAsserts.*;
 
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
@@ -82,10 +95,6 @@ public class Netcat {
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-
 
 /**
  * Sleeps with no exception

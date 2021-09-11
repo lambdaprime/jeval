@@ -38,9 +38,9 @@ import java.util.function.Function;
 
 import id.jeval.commands.DependencyResolver;
 import id.jeval.commands.OpenScripts;
-import id.xfunction.ArgumentParsingException;
-import id.xfunction.SmartArgs;
 import id.xfunction.XUtils;
+import id.xfunction.cli.ArgumentParsingException;
+import id.xfunction.cli.SmartArgs;
 import id.xfunction.function.ThrowingRunnable;
 import id.xfunction.function.Unchecked;
 import jdk.jshell.JShell;
