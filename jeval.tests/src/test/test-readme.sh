@@ -36,7 +36,7 @@ cat << EOF > /tmp/r.xml
     </note>
 </notes>
 EOF
-OUT=$(jeval -e '{Document d = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/tmp/r.xml")); out.println(XPathFactory.newInstance().newXPath().evaluate("//note/to", d));}')
+OUT=$(jeval -e 'out.println(XPathFactory.newInstance().newXPath().evaluate("//note/to", DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/tmp/r.xml"))))')
 EXPECTED="Tove"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
