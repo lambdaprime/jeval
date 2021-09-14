@@ -13,8 +13,8 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 }
 
-sourceCompatibility = '1.9'
-targetCompatibility = '1.9'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
 def releaseDir = "release/${projectName}/${projectName}"
 
@@ -26,14 +26,24 @@ jar {
     }
 }
 
-task packageDistribution(type: Zip) {
-    archiveFileName = "$releaseFileName"
-    destinationDirectory = file("$projectDir/release")
-    from file("$projectDir/release/$projectName")
+java {
+    modularity.inferModulePath = true
 }
 
-packageDistribution.doLast {
-    delete "$projectDir/release/$projectName"
+def packageDir = "$buildDir/package/${projectName}"
+
+ext.artifacts = fileTree(include: ['*'], dir: "$packageDir/libs")
+
+task createRelease(type: Zip) {
+    archiveFileName = "$releaseFileName"
+    destinationDirectory = file("$projectDir/release")
+    from file("$packageDir/..")
+}
+
+task copyLibs(type: Copy) {
+    from "$projectDir/libs"
+    from jar.archiveFile
+    into "${packageDir}/libs"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -43,26 +53,26 @@ task updateVersion(type:Copy) {
     filter(ReplaceTokens, tokens: [version: rootProject.version])
 }
 
-task createRelease(type: Copy, dependsOn: updateVersion) {
-    from jar.archiveFile
-    from file("$projectDir/libs")
-    from "${project.rootDir}/LICENSE-2.0.txt"
-    from file("$projectDir/src/jeval")
-    from file("$projectDir/src/jeval.bat")
-    into releaseDir
-}
-
-task cleanRelease(type: Delete) {
-    delete "$projectDir/release"
-}
-
-packageDistribution.dependsOn createRelease
-assemble.dependsOn packageDistribution
-clean.dependsOn cleanRelease
-
-task copyReadme(type: Copy, dependsOn: updateVersion) {
-    from("$releaseDir/README.md")
+task copyReadme(type: Copy) {
+    from("${project.rootDir}/README.md")
     into("$projectDir/src/main/resources")
 }
 
+task createPackage(type: Copy, dependsOn: copyLibs) {
+    from "${project.rootDir}/README.md"
+    from "${project.rootDir}/LICENSE-2.0.txt"
+    from file("$projectDir/src/jeval")
+    from file("$projectDir/src/jeval.bat")
+    into packageDir
+}
+
+task cleanRelease(type: Delete) {
+    delete "$packageDir"
+    delete "$projectDir/release"
+}
+
 compileJava.dependsOn copyReadme
+createRelease.dependsOn createPackage
+assemble.dependsOn createRelease
+clean.dependsOn cleanRelease
+

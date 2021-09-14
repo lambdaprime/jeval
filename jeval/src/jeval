@@ -27,9 +27,9 @@ fi
 # this script will only work if user pass classpath through CLASSPATH
 # and not through JAVA_ARGS
 if [ -z "${CLASSPATH}" ]; then
-    CLASSPATH="${JEVAL_PATH}/jeval.jar"
+    CLASSPATH="${JEVAL_PATH}/libs/*"
 else
-    CLASSPATH="${JEVAL_PATH}/jeval.jar${CP_SEP}${CLASSPATH}"
+    CLASSPATH="${JEVAL_PATH}/libs/*${CP_SEP}${CLASSPATH}"
 fi
 
 # We cannot use -jar option because it ignores -cp and $CLASSPATH
