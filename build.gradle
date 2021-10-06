@@ -1,13 +1,11 @@
+// Requires gradle 7.2
+
 allprojects {
     repositories {
         jcenter() 
     }
 }
 
-version = '22'
-
 ext {
-    version = '22'
-    projectName = 'jeval'
     releaseFileName = "${projectName}-${version}.zip"
 }

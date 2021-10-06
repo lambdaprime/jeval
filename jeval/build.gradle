@@ -1,6 +1,3 @@
-/**
- * gradle clean build
- */
 plugins {
     id 'java'
 }
@@ -10,19 +7,19 @@ repositories {
 }
  
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // transitively export following dependency to tests project
+    apiElements fileTree(include: ['*.jar'], dir: 'libs')
 }
 
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
-def releaseDir = "release/${projectName}/${projectName}"
-
 jar { 
     manifest { 
         attributes 'Implementation-Version': "${rootProject.version}",
-                   'Main-Class': 'id.jeval.Main', 
-                   'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+                   'Main-Class': 'id.jeval.Main'
     }
 }
 
@@ -49,7 +46,7 @@ task copyLibs(type: Copy) {
 import org.apache.tools.ant.filters.ReplaceTokens
 task updateVersion(type:Copy) {
     from "${project.rootDir}/README.md"
-    into releaseDir
+    into packageDir
     filter(ReplaceTokens, tokens: [version: rootProject.version])
 }
 
@@ -75,4 +72,5 @@ compileJava.dependsOn copyReadme
 createRelease.dependsOn createPackage
 assemble.dependsOn createRelease
 clean.dependsOn cleanRelease
+processResources.dependsOn copyReadme
 
