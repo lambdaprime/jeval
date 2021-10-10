@@ -465,3 +465,47 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
 fi
+
+echo "Test 26 Testing shebang"
+cat << EOF > /tmp/l
+#!/usr/bin/env jeval
+
+var lines = List.of("1", "2", "3");
+lines = lines.stream()
+    .collect(toList());
+
+out.println(lines);
+
+int helloWorld() {
+    out.println("Hello world");
+    return 10;
+}
+helloWorld();
+EOF
+chmod u+x /tmp/l
+OUT=$(/tmp/l)
+EXPECTED="[1, 2, 3]
+Hello world"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 27 Testing shebang with special commands"
+cat << EOF > /tmp/l
+#!/usr/bin/env jeval
+
+//dependency org.yaml:snakeyaml:1.21
+import org.yaml.snakeyaml.*;
+Yaml yaml = new Yaml();
+String document = "\n- Hesperiidae\n- Papilionidae\n- Apatelodidae\n- Epiplemidae";
+List<String> list = (List<String>) yaml.load(document);
+System.out.println(list);
+EOF
+chmod u+x /tmp/l
+OUT=$(/tmp/l)
+EXPECTED="[Hesperiidae, Papilionidae, Apatelodidae, Epiplemidae]"
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi

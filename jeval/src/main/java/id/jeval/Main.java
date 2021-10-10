@@ -23,18 +23,25 @@ import static java.lang.System.in;
 import static java.lang.System.out;
 import static java.util.stream.Collectors.joining;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import id.jeval.commands.DependencyResolver;
 import id.jeval.commands.OpenScripts;
@@ -92,20 +99,26 @@ public class Main {
         return XUtils.quote(str);
     }
 
-    private static void runScript(Path file) throws IOException {
+    private static void runScript(Path file, Stream<String> stream) {
         eventHandler.setIsScript(true);
-        List<String> lines = Files.readAllLines(file);
         OpenScripts opener = new OpenScripts();
-        for (String line: lines) {
-            if (eventHandler.isError()) break;
+        boolean[] firstLine = new boolean[] {true};
+        stream.forEach(line -> {
+            if (firstLine[0]) {
+                firstLine[0] = false;
+                if (line.startsWith("#!")) {
+                    return;
+                }
+            }
+            if (eventHandler.isError()) return;
             eventHandler.onNextLine(file);
             if (line.startsWith(OPEN_COMMAND)) {
                 Path openFile = opener.open(file, line);
-                runScript(openFile);
-                continue;
+                runScript(openFile, Unchecked.get(() -> Files.readAllLines(openFile).stream()));
+                return;
             }
             jshExec.onNext(line);
-        }
+        });
     }
 
     private static void runSnippet(String snippet) {
@@ -128,6 +141,27 @@ public class Main {
             "-e", snippet -> runnable[0] = curryAccept(Main::runSnippet, snippet),
             "-classpath", cp -> classPathList.addAll(toClasspathList(cp)));
         Function<String, Boolean> defaultHandler = arg -> {
+            if (arg.equals("-i")) {
+                runnable[0] = () -> {
+                    scriptPath = Optional.of(Paths.get("").toAbsolutePath());
+                    Scanner scanner = new Scanner(new BufferedReader(new InputStreamReader(in)));
+                    Iterator<String> iter = new Iterator<String>() {
+                        @Override
+                        public boolean hasNext() {
+                            return scanner.hasNextLine();
+                        }
+                        @Override
+                        public String next() {
+                            return scanner.nextLine();
+                        }
+                    };
+                    Stream<String> stream = StreamSupport.stream(
+                        Spliterators.spliteratorUnknownSize(iter, Spliterator.ORDERED),
+                        false);
+                    runScript(scriptPath.get(), stream);
+                };
+                return true;
+            }
             if (runnable[0] != null) {
                 // if we set the runnable already we can start
                 // populate the args
@@ -137,12 +171,11 @@ public class Main {
             Path path = Paths.get(arg);
             scriptPath = Optional.of(path.toAbsolutePath());
             Unchecked.run(() -> classPathList.addAll(new DependencyResolver().resolve(path)));
-            runnable[0] = curryAccept(Main::runScript, path);
+            runnable[0] = () -> runScript(path, Files.readAllLines(path).stream());
             return true;
         };
         
-        try
-        {
+        try {
             new SmartArgs(handlers, defaultHandler).parse(args);
             if (runnable[0] == null) throw new Exception();
         } catch (ArgumentParsingException e) {

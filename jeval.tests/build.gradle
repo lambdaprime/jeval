@@ -43,6 +43,7 @@ task myTestReadme(type: Exec) {
 
 task myTestSnippet(type: Exec) {
     standardInput = System.in
+    environment.put("PATH", testDir + ":" + System.getenv("PATH"))
     commandLine "bash", testSrcDir + "/test.sh"
     environment("JEVAL_PATH", testDir)
 }
