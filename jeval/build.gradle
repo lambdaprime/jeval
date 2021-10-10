@@ -52,7 +52,7 @@ task updateVersion(type:Copy) {
 
 task copyReadme(type: Copy) {
     from("${project.rootDir}/README.md")
-    into("$projectDir/src/main/resources")
+    into("$projectDir/src/main/resources/jeval")
 }
 
 task createPackage(type: Copy, dependsOn: copyLibs) {
