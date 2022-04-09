@@ -33,6 +33,7 @@ public class PositionsHighlighter {
     }
     
     public String highlight() {
+        if (text.isEmpty()) return "";
         buffer = new ArrayList<>();
         int newTextLen = 0;
         HLine hline = new HLine();

@@ -12,7 +12,7 @@ JAVA_SCRIPT - Java script file to be executed
 
 JAVA_SNIPPET - Java expression
 
-ARGS - optional user arguments which will be available to you through the global variable "args: String[]". 
+ARGS - optional user arguments which will be available to you through the global variable "args: String[]" (same as you use in main() function). 
 
 # Documentation
 

@@ -509,3 +509,38 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1
 fi
+
+echo "Test 28 Testing highlighter does not crash on empty string"
+cat << EOF > /tmp/l
+
+new Texture("sssss")= Texture cat;
+
+EOF
+OUT=$(jeval /tmp/l 2>&1)
+EXPECTED='/tmp/l: 1: missing return statement
+
+
+/tmp/l: 2: cannot find symbol
+  symbol:   class Texture
+  location: class 
+new Texture("sssss")= Texture cat;
+    ^
+
+/tmp/l: 2: cannot find symbol
+  symbol:   variable Texture
+  location: class 
+new Texture("sssss")= Texture cat;
+                      ^
+
+/tmp/l: 2: '"';'"' expected
+new Texture("sssss")= Texture cat;
+                             ^
+
+/tmp/l: 2: not a statement
+new Texture("sssss")= Texture cat;
+                              ^'
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    echo "FAILED $EXPECTED"
+    exit 1
+fi
