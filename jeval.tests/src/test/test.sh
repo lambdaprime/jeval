@@ -35,7 +35,7 @@ Y y = null;
 
 /tmp/r: 3: method m in class  cannot be applied to given types;
   required: no arguments
-  found: <nulltype>,<nulltype>
+  found:    <nulltype>,<nulltype>
   reason: actual and formal argument lists differ in length
         m(null, null);
         ^"
@@ -145,8 +145,8 @@ EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition sni
     printf(g);
 }
 
-	at .f(#59:1)
-	at .(#60:1)
+	at .f(#58:1)
+	at .(#59:1)
 /tmp/r: Unresolved symbol in the snippet starting at line 1: variable g'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
@@ -276,8 +276,8 @@ EOF
 OUT=$(jeval /tmp/r 2>&1)
 EXPECTED='jdk.jshell.UnresolvedReferenceException: Attempt to use definition snippet with unresolved references in MethodSnippet:m/()void-void m() {out.println(ggg);}
 
-	at .m(#59:1)
-	at .(#60:1)
+	at .m(#58:1)
+	at .(#59:1)
 /tmp/rr: Unresolved symbol in the snippet starting at line 1: variable ggg'
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED [$OUT] [$EXPECTED]"
@@ -517,10 +517,7 @@ new Texture("sssss")= Texture cat;
 
 EOF
 OUT=$(jeval /tmp/l 2>&1)
-EXPECTED='/tmp/l: 1: missing return statement
-
-
-/tmp/l: 2: cannot find symbol
+EXPECTED='/tmp/l: 2: cannot find symbol
   symbol:   class Texture
   location: class 
 new Texture("sssss")= Texture cat;

@@ -13,19 +13,6 @@ String json = <<EOF
   }
 }
 EOF;
-
-JSObject menu = (JSObject)new ScriptEngineManager()
-    .getEngineByName("nashorn")
-    .eval("var v = " + json + "; v[\"menu\"]");
-
-out.println(menu.getMember("id"));
-
-JSObject items = (JSObject)menu.getMember("menuitem");
-
-items.values().stream()
-    .map(obj -> (JSObject)obj)
-    .map(js -> js.getMember("value"))
-    .forEach(out::println);
     
 out.println(<<EOF
 5
@@ -76,7 +63,7 @@ int ret = new XExec("ls /sdfgsdfg")
     .run()
     .code()
     .get();
-assertTrue(ret == 2, "Return code is wrong");
+isTrue(ret == 2, "Return code is wrong");
     
 Path xmlFile = Paths.get("src/test/test.xml");
 out.println(Xml.query(xmlFile, "//note/to/@test"));
@@ -95,7 +82,7 @@ lineN
 EOF;
 
 out.println(s);
-assertTrue(s.chars().filter(c -> c == '\n').count() == 3);
+isTrue(s.chars().filter(c -> c == '\n').count() == 3);
 
 var client = new HttpClientBuilder()
     .insecure()

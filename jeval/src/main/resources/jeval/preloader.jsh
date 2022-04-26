@@ -7,8 +7,7 @@ import static java.util.Arrays.*;
 import static java.lang.String.*;
 
 import javax.script.*;
-import jdk.nashorn.api.scripting.*;
-        
+
 import java.util.*;
 import java.util.stream.*;
 import java.util.concurrent.*;
@@ -42,7 +41,7 @@ import id.xfunction.util.stream.*;
 
 import static id.xfunction.cli.CommandLineInterface.*;
 import static id.xfunction.net.XHttpClient.*;
-import static id.xfunction.XAsserts.*;
+import static id.xfunction.Preconditions.*;
 
 BufferedReader stdin = new BufferedReader(new InputStreamReader(in));
 

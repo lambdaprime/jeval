@@ -66,14 +66,6 @@ if [ "$OUT" != "$EXPECTED" ]; then
     exit 1
 fi
 
-echo "Test 6"
-OUT=$(echo '{"menu":123}' | jeval -e 'new ScriptEngineManager().getEngineByName("nashorn").eval("var v = " + stdin.lines().collect(joining("\n")) + "; v[\"menu\"]");')
-EXPECTED="123"
-if [ "$OUT" != "$EXPECTED" ]; then
-    echo "FAILED $OUT"
-    exit 1
-fi
-
 echo "Test 7"
 OUT=$(jeval -e 'format("args %s, %s", args[0], args[1])' "arg1" "arg2")
 EXPECTED='"args arg1, arg2"'

@@ -34,4 +34,4 @@ fi
 
 # We cannot use -jar option because it ignores -cp and $CLASSPATH
 # and we want to let user add new jars to classpath
-java ${JAVA_ARGS} -Xnoclassgc -noverify -cp "${CLASSPATH}" id.jeval.Main "$@"
+java ${JAVA_ARGS} -Xnoclassgc -cp "${CLASSPATH}" id.jeval.Main "$@"
