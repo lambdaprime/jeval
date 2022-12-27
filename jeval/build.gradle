@@ -1,3 +1,9 @@
+plugins {
+    id 'com.diffplug.spotless'
+}
+
+apply plugin : 'eclipse'
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "io.github.lambdaprime:id.xfunction:19.0"
@@ -42,8 +48,8 @@ task updateVersion(type:Copy) {
 }
 
 task copyReadme(type: Copy) {
-    from("${project.rootDir}/README.md")
-    into("$projectDir/src/main/resources/jeval")
+    from("../README.md")
+    into("$buildDir/resources/main/jeval")
 }
 
 task createPackage(type: Copy, dependsOn: copyLibs) {
@@ -65,3 +71,5 @@ assemble.dependsOn createRelease
 clean.dependsOn cleanRelease
 processResources.dependsOn copyReadme
 
+// run spotless and format code before the build
+classes.dependsOn spotlessApply

@@ -1,5 +1,7 @@
 /*
- * Copyright 2019 lambdaprime
+ * Copyright 2019 jeval project
+ * 
+ * Website: https://github.com/lambdaprime/jeval
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +23,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @author lambdaprime intid@protonmail.com
+ */
 class DocumentHereProcessor {
-    
+
     private static final String SOF = "<<EOF";
     private static final String EOF = "EOF";
-    
+
     private StringBuilder buf = new StringBuilder();
     private List<String> documentHere = new LinkedList<>();
-    
+
     public boolean isStarted(String line) {
         line = line.trim();
-        if (!line.endsWith("<<" + EOF))
-            return false;
+        if (!line.endsWith("<<" + EOF)) return false;
         buf.setLength(0);
         documentHere.clear();
         buf.append(line.substring(0, line.length() - SOF.length()));
@@ -52,15 +56,17 @@ class DocumentHereProcessor {
     public String buildLine() {
         return buf.toString();
     }
-    
+
     private String makeLiteral() {
         if (documentHere.isEmpty()) return "";
-        List<String> lines = documentHere.stream()
-            .map(s -> s.toString().replace("\"", "\\\""))
-            .collect(toList());
-        String str = lines.subList(0, lines.size() - 1).stream()
-                .map(s -> String.format("\"%s\\n\" +\n", s))
-                .collect(Collectors.joining());
+        List<String> lines =
+                documentHere.stream()
+                        .map(s -> s.toString().replace("\"", "\\\""))
+                        .collect(toList());
+        String str =
+                lines.subList(0, lines.size() - 1).stream()
+                        .map(s -> String.format("\"%s\\n\" +\n", s))
+                        .collect(Collectors.joining());
         str += String.format("\"%s\"", lines.get(lines.size() - 1));
         return str;
     }

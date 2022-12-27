@@ -1,5 +1,7 @@
 /*
- * Copyright 2019 lambdaprime
+ * Copyright 2019 jeval project
+ * 
+ * Website: https://github.com/lambdaprime/jeval
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +21,14 @@ import static jdk.jshell.SourceCodeAnalysis.Completeness.COMPLETE;
 
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
-
 import jdk.jshell.JShell;
-import jdk.jshell.Snippet;
 import jdk.jshell.SourceCodeAnalysis;
 
+/**
+ * @author lambdaprime intid@protonmail.com
+ */
 class JshExecutor implements Subscriber<String> {
-    
+
     private JShell jshell;
     private SourceCodeAnalysis srcAnalysis;
     private StringBuilder buf = new StringBuilder();
@@ -33,7 +36,7 @@ class JshExecutor implements Subscriber<String> {
     private DocumentHereProcessor documentHere = new DocumentHereProcessor();
     private boolean isExecuted;
     private boolean isComplete;
-    
+
     public JshExecutor(JShell jshell) {
         this.jshell = jshell;
         srcAnalysis = jshell.sourceCodeAnalysis();
@@ -50,11 +53,9 @@ class JshExecutor implements Subscriber<String> {
     public boolean isComplete() {
         return isComplete;
     }
-    
+
     @Override
-    public void onError(Throwable arg0) {
-        
-    }
+    public void onError(Throwable arg0) {}
 
     @Override
     public void onNext(String line) {
@@ -64,16 +65,14 @@ class JshExecutor implements Subscriber<String> {
             return;
         }
         if (isDocumentHere) {
-            if (!documentHere.isFinished(line))
-                return;
+            if (!documentHere.isFinished(line)) return;
             line = documentHere.buildLine();
             isDocumentHere = false;
         }
         buf.append(line);
         buf.append("\n");
         String src = buf.toString();
-        if (srcAnalysis.analyzeCompletion(src).completeness() != COMPLETE)
-            return;
+        if (srcAnalysis.analyzeCompletion(src).completeness() != COMPLETE) return;
         if (src.trim().endsWith(";") || src.trim().endsWith("}")) {
             buf.setLength(0);
             jshell.eval(src);
@@ -82,8 +81,5 @@ class JshExecutor implements Subscriber<String> {
     }
 
     @Override
-    public void onSubscribe(Subscription arg0) {
-        
-    }
-    
+    public void onSubscribe(Subscription arg0) {}
 }
