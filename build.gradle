@@ -2,7 +2,8 @@
 
 allprojects {
     repositories {
-        jcenter() 
+        mavenLocal()
+        mavenCentral()
     }
 }
 

@@ -57,7 +57,7 @@ out.println("args: " + Arrays.toString(args));
 
 new XExec("curl", "-L", "-G", "http://google.com")
     .run()
-    .stdout()
+    .stdoutAsStream()
     .forEach(out::println);
 int ret = new XExec("ls /sdfgsdfg")
     .run()

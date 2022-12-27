@@ -154,7 +154,7 @@ if [ "$OUT" != "$EXPECTED" ]; then
 fi
 
 echo "Test 7"
-OUT=$(jeval -e 'assertTrue(2 == new XExec("ls /sdfgsdfg").run().code().get(), "Return code is wrong")')
+OUT=$(jeval -e 'isTrue(2 == new XExec("ls /sdfgsdfg").run().code().get(), "Return code is wrong")')
 EXPECTED=""
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
