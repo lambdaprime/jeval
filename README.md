@@ -1,4 +1,4 @@
-**jeval** - command line Java code evaluator.
+**jeval** - command line Java code evaluator. It is similar to [JShell](https://docs.oracle.com/en/java/javase/17/jshell/introduction-jshell.html) except it provides you additional functionality and better integration with command-line. **jeval** allows you to declare dependencies in Java scripts to any libraries from Maven repository so that it will automatically resolve them and add to the script class path. See [examples](http://portal2.atwebpages.com/jeval/)
 
 # Usage
 
