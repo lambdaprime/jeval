@@ -541,3 +541,29 @@ if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $EXPECTED"
     exit 1
 fi
+
+echo "Test 29 Multiline"
+cat << EOF > /tmp/l
+String json = """
+{
+    "menuitem": [
+      {"value": "2", "onclick": "CreateNewDoc()"},
+      {"value": "3", "onclick": "OpenDoc()"},
+      {"value": "4", "onclick": "CloseDoc()"}
+    ]
+}
+""";
+out.println(json);
+EOF
+OUT=$(jeval /tmp/l 2>&1)
+EXPECTED='{
+    "menuitem": [
+      {"value": "2", "onclick": "CreateNewDoc()"},
+      {"value": "3", "onclick": "OpenDoc()"},
+      {"value": "4", "onclick": "CloseDoc()"}
+    ]
+}'
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi

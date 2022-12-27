@@ -49,7 +49,7 @@ task updateVersion(type:Copy) {
 
 task copyReadme(type: Copy) {
     from("../README.md")
-    into("$buildDir/resources/main/jeval")
+    into("$buildDir/resources/main/jeval/")
 }
 
 task createPackage(type: Copy, dependsOn: copyLibs) {
