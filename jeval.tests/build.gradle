@@ -1,9 +1,9 @@
 dependencies {
-    testImplementation project(':jeval')
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')
-    testImplementation('org.junit.jupiter:junit-jupiter-params:5.4.2')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.2')
-    testRuntimeOnly("org.junit.platform:junit-platform-commons:1.7.0")
+  testImplementation project(':jeval')
+  testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')
+  testImplementation('org.junit.jupiter:junit-jupiter-params:5.4.2')
+  testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.2')
+  testRuntimeOnly("org.junit.platform:junit-platform-commons:1.7.0")
 }
 
 String testDir = "$buildDir/${projectName}"
@@ -11,34 +11,34 @@ String testSrcDir = "$projectDir/src/test"
 
 // Gradle has no UnZip task so we reuse Copy for that
 task myTest(type: Copy) {
-    mkdir file(testDir)
-    from zipTree("${project.rootDir}/jeval/release/${releaseFileName}")
-    into "$buildDir"
+  mkdir file(testDir)
+  from zipTree("${project.rootDir}/jeval/release/${releaseFileName}")
+  into "$buildDir"
 }
 
 task myTestFile(type: Exec) {
-    standardInput = System.in
-    commandLine testDir + "/jeval", testSrcDir + "/test.java"
+  standardInput = System.in
+  commandLine testDir + "/jeval", testSrcDir + "/test.java"
 }
 
 task myTestReadme(type: Exec) {
-    standardInput = System.in
-    commandLine "bash", testSrcDir + "/test-readme.sh"
-    environment("JEVAL_PATH", testDir)
+  standardInput = System.in
+  commandLine "bash", testSrcDir + "/test-readme.sh"
+  environment("JEVAL_PATH", testDir)
 }
 
 task myTestSnippet(type: Exec) {
-    standardInput = System.in
-    environment.put("PATH", testDir + ":" + System.getenv("PATH"))
-    commandLine "bash", testSrcDir + "/test.sh"
-    environment("JEVAL_PATH", testDir)
+  standardInput = System.in
+  environment.put("PATH", testDir + ":" + System.getenv("PATH"))
+  commandLine "bash", testSrcDir + "/test.sh"
+  environment("JEVAL_PATH", testDir)
 }
 
 test {
-    useJUnitPlatform()
-    filter {
-        exclude '**/module-info.class'
-    }
+  useJUnitPlatform()
+  filter {
+    exclude '**/module-info.class'
+  }
 }
 
 test.dependsOn myTest

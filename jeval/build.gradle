@@ -1,16 +1,27 @@
 plugins {
-    id 'com.diffplug.spotless'
+  id 'com.diffplug.spotless'
+  id 'java-library'
 }
 
 apply plugin : 'eclipse'
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "io.github.lambdaprime:id.xfunction:19.0"
+  api fileTree(include: ['*.jar'], dir: 'libs')
+  api "io.github.lambdaprime:id.xfunction:19.0"
 
-    // transitively export following dependency to tests project
-    apiElements fileTree(include: ['*.jar'], dir: 'libs')
-    apiElements "io.github.lambdaprime:id.xfunction:19.0"
+  def resolverVersion = "1.7.2"
+  api "org.apache.maven.resolver:maven-resolver:${resolverVersion}"
+  api "org.apache.maven.resolver:maven-resolver-impl:${resolverVersion}"
+  api "org.apache.maven.resolver:maven-resolver-util:${resolverVersion}"
+  api "org.apache.maven.resolver:maven-resolver-connector-basic:${resolverVersion}"
+  api "org.apache.maven.resolver:maven-resolver-transport-file:${resolverVersion}"
+  api "org.apache.maven.resolver:maven-resolver-transport-http:${resolverVersion}"
+
+  def mavenVersion = "3.8.4"
+  api "org.apache.maven:maven-model-builder:${mavenVersion}"
+  api "org.apache.maven:maven-resolver-provider:${mavenVersion}"
+
+  api "org.slf4j:slf4j-simple:1.7.32"
 }
 
 configurations {
@@ -18,10 +29,10 @@ configurations {
 }
 
 jar { 
-    manifest { 
-        attributes 'Implementation-Version': "${rootProject.version}",
-                   'Main-Class': 'id.jeval.Main'
-    }
+  manifest { 
+    attributes 'Implementation-Version': "${rootProject.version}",
+      'Main-Class': 'id.jeval.Main'
+  }
 }
 
 def packageDir = "$buildDir/package/${projectName}"
@@ -29,40 +40,40 @@ def packageDir = "$buildDir/package/${projectName}"
 ext.artifacts = fileTree(include: ['*'], dir: "$packageDir/libs")
 
 task createRelease(type: Zip) {
-    archiveFileName = "$releaseFileName"
-    destinationDirectory = file("$projectDir/release")
-    from file("$packageDir/..")
+  archiveFileName = "$releaseFileName"
+  destinationDirectory = file("$projectDir/release")
+  from file("$packageDir/..")
 }
 
 task copyLibs(type: Copy) {
-    from configurations.customConfig
-    from jar.archiveFile
-    into "${packageDir}/libs"
+  from configurations.customConfig
+  from jar.archiveFile
+  into "${packageDir}/libs"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
 task updateVersion(type:Copy) {
-    from "${project.rootDir}/README.md"
-    into packageDir
-    filter(ReplaceTokens, tokens: [version: rootProject.version])
+  from "${project.rootDir}/README.md"
+  into packageDir
+  filter(ReplaceTokens, tokens: [version: rootProject.version])
 }
 
 task copyReadme(type: Copy) {
-    from("../README.md")
-    into("$buildDir/resources/main/jeval/")
+  from("../README.md")
+  into("$buildDir/resources/main/jeval/")
 }
 
 task createPackage(type: Copy, dependsOn: copyLibs) {
-    from "${project.rootDir}/README.md"
-    from "${project.rootDir}/LICENSE-2.0.txt"
-    from file("$projectDir/src/jeval")
-    from file("$projectDir/src/jeval.bat")
-    into packageDir
+  from "${project.rootDir}/README.md"
+  from "${project.rootDir}/LICENSE-2.0.txt"
+  from file("$projectDir/src/jeval")
+  from file("$projectDir/src/jeval.bat")
+  into packageDir
 }
 
 task cleanRelease(type: Delete) {
-    delete "$packageDir"
-    delete "$projectDir/release"
+  delete "$packageDir"
+  delete "$projectDir/release/*-SNAPSHOT.zip"
 }
 
 compileJava.dependsOn copyReadme
