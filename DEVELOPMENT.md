@@ -41,10 +41,9 @@ mvn clean install -Papp
 # Release steps
 
 - Close version in gradle.properties
-- Run `gradle clean build javadoc`
-- Publish
-- Open next SNAPSHOT version
+- Run `gradle clean build`
 - Update CHANGELOG.md with new release (for changelog generation use `git log --format=%s`)
+- Open next SNAPSHOT version
 - Commit changes
 - Push
 - Upload documentation to website
