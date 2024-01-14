@@ -56,11 +56,11 @@ rangeClosed(10, 10)
 out.println("args: " + Arrays.toString(args));
 
 new XExec("curl", "-L", "-G", "http://google.com")
-    .run()
+    .start()
     .stdoutAsStream()
     .forEach(out::println);
 int ret = new XExec("ls /sdfgsdfg")
-    .run()
+    .start()
     .code()
     .get();
 isTrue(ret == 2, "Return code is wrong");

@@ -75,7 +75,7 @@ if [ "$OUT" != "$EXPECTED" ]; then
 fi
 
 echo "Test 8"
-OUT=$(jeval -e 'new XExec("curl -L -G -vvv http://google.com").run().stderrAsStream().forEach(out::println)')
+OUT=$(jeval -e 'new XExec("curl -L -G -vvv http://google.com").start().stderrAsStream().forEach(out::println)')
 echo "$OUT" | grep -q "HTTP\/1.1 200 OK"
 if [ $? -ne 0 ]; then
     echo "FAILED $OUT"
@@ -99,7 +99,7 @@ fi
 
 echo "Test 11"
 rm /tmp/test-*
-OUT=$(jeval -e 'try (var c = new ParallelConsumer(s -> new XExec("touch /tmp/test-" + s).run().await())) {XStream.infiniteRandomStream(12).limit(20).forEach(c);}' && ls /tmp/test-* | wc -l)
+OUT=$(jeval -e 'try (var c = new ParallelConsumer(s -> new XExec("touch /tmp/test-" + s).start().await())) {XStream.infiniteRandomStream(12).limit(20).forEach(c);}' && ls /tmp/test-* | wc -l)
 if [ "$OUT" != "20" ]; then
     echo "FAILED 11"
     exit 1

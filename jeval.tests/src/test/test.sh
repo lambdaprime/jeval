@@ -154,7 +154,7 @@ if [ "$OUT" != "$EXPECTED" ]; then
 fi
 
 echo "Test 7"
-OUT=$(jeval -e 'isTrue(2 == new XExec("ls /sdfgsdfg").run().code().get(), "Return code is wrong")')
+OUT=$(jeval -e 'isTrue(2 == new XExec("ls /sdfgsdfg").start().code().get(), "Return code is wrong")')
 EXPECTED=""
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
@@ -198,7 +198,7 @@ echo "Test 12"
 cat << EOF > /tmp/r
 void g() {
     var y = new Exec("ffff")
-        .run();
+        .start();
 }
 Runnable r = () -> {
     try {
