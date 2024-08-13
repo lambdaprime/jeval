@@ -77,10 +77,10 @@ public class Main {
     private static void preloader(JshExecutor jshExec) throws IOException {
         eventHandler.setIsScript(true);
         Scanner scanner =
-                new Scanner(Main.class.getResource("/jeval/preloader.jsh").openStream())
+                new Scanner(Main.class.getResource("/jeval/jeval-startup.jsh").openStream())
                         .useDelimiter("\n");
         while (scanner.hasNext()) {
-            eventHandler.onNextLine(Paths.get("preloader.jsh"));
+            eventHandler.onNextLine(Paths.get("jeval-startup.jsh"));
             jshExec.onNext(scanner.next());
         }
     }

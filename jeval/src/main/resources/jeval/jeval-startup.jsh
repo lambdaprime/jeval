@@ -1,3 +1,7 @@
+// jeval startup script
+// Can be executed with `jshell --startup`
+// See https://docs.oracle.com/en/java/javase/21/jshell/scripts.html
+
 import static java.util.stream.IntStream.*;
 import static java.util.stream.Collectors.*;
 import static java.lang.System.*;
