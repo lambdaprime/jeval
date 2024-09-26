@@ -65,7 +65,7 @@ ext {
  * be checked everytime when it is updated (otherwise it do not seems secure)
  * To avoid using it we rely on manual version check
  */
-def requiredGradleVersion = "8.3"
+def requiredGradleVersion = "8.10.1"
 if ("$gradle.gradleVersion" != "$requiredGradleVersion")
   throw new RuntimeException("Running gradle version $gradle.gradleVersion, required $requiredGradleVersion");
 

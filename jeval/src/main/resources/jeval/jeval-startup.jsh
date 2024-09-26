@@ -1,5 +1,5 @@
 // jeval startup script
-// Can be executed with `jshell --startup`
+// To run with `jshell --startup` it requires dependency libraries to be present on the CLASSPATH.
 // See https://docs.oracle.com/en/java/javase/21/jshell/scripts.html
 
 import static java.util.stream.IntStream.*;
