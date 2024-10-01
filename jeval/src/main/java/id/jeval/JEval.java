@@ -26,9 +26,12 @@ import static java.util.stream.Collectors.joining;
 
 import id.jeval.commands.DependencyResolver;
 import id.jeval.commands.OpenScripts;
+import id.xfunction.Preconditions;
+import id.xfunction.ResourceUtils;
 import id.xfunction.XUtils;
 import id.xfunction.function.ThrowingRunnable;
 import id.xfunction.function.Unchecked;
+import id.xfunction.lang.XExec;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -39,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Spliterator;
@@ -52,25 +56,32 @@ import jdk.jshell.JShell;
  */
 public class JEval {
 
+    private static final String STARTUP_PATH = "jeval/jeval-startup.jsh";
     private static final String CLASSPATH_SEP = System.getProperty("path.separator", ":");
+    private static final ResourceUtils resourceUtils = new ResourceUtils();
     private JShell jshell;
     private JshExecutor jshExec;
     private EventHandler eventHandler;
     private Optional<Path> scriptPath = Optional.empty();
-    ThrowingRunnable<Exception> runnable;
-    List<String> runnableArgs = new ArrayList<>();
-    List<String> classPathList = toClasspathList(System.getProperty("java.class.path", ""));
+    private ThrowingRunnable<Exception> runnable;
+    private List<String> runnableArgs = new ArrayList<>();
+    private String classPath;
 
     public static class Builder {
+        private List<String> classPathList =
+                toClasspathList(System.getProperty("java.class.path", ""));
         private JEval jeval = new JEval();
+        private boolean useJShellExternal;
 
         public Builder runSnippet(String snippet) {
+            Preconditions.isTrue(
+                    !useJShellExternal, "Cannot run snippet when external JShell requested");
             jeval.runnable = curryAccept(jeval::runSnippet, snippet);
             return this;
         }
 
         public Builder addClasspath(String cp) {
-            jeval.classPathList.addAll(toClasspathList(cp));
+            classPathList.addAll(toClasspathList(cp));
             return this;
         }
 
@@ -80,6 +91,9 @@ public class JEval {
         }
 
         public Builder runInteractive() {
+            Preconditions.isTrue(
+                    !useJShellExternal,
+                    "Cannot run interactive mode when external JShell requested");
             jeval.runnable =
                     () -> {
                         jeval.scriptPath = Optional.of(Paths.get("").toAbsolutePath());
@@ -108,32 +122,56 @@ public class JEval {
         }
 
         public Builder runScript(String arg) {
+            Preconditions.isTrue(
+                    !useJShellExternal, "Cannot run the script when external JShell requested");
             Path path = Paths.get(arg);
             jeval.scriptPath = Optional.of(path.toAbsolutePath());
-            Unchecked.run(() -> jeval.classPathList.addAll(new DependencyResolver().resolve(path)));
+            Unchecked.run(() -> classPathList.addAll(new DependencyResolver().resolve(path)));
             jeval.runnable = () -> jeval.runScript(path, Files.readAllLines(path).stream());
             return this;
         }
 
-        public JEval build() {
-            return jeval;
-        }
-
         public boolean hasRunnable() {
             return jeval.runnable != null;
+        }
+
+        public Builder runJShellExternal() {
+            useJShellExternal = true;
+            return this;
+        }
+
+        public JEval build() {
+            jeval.classPath = toClasspath(classPathList);
+            if (useJShellExternal)
+                return new JEval() {
+                    @Override
+                    public boolean run() throws Exception {
+                        var startupFile = Files.createTempFile("jeval", "startup");
+                        startupFile.toFile().deleteOnExit();
+                        resourceUtils.extractResource(STARTUP_PATH, startupFile);
+                        var exec =
+                                new XExec("jshell", "-startup", startupFile.toString())
+                                        .withEnvironmentVariables(
+                                                Map.of("CLASSPATH", jeval.classPath));
+                        exec.getProcessBuilder().inheritIO();
+                        return exec.start().await() == 0;
+                    }
+                };
+            else return jeval;
         }
     }
 
     @SuppressWarnings("resource")
     private void preloader(JshExecutor jshExec) throws IOException {
         eventHandler.setIsScript(true);
-        Scanner scanner =
-                new Scanner(Main.class.getResource("/jeval/jeval-startup.jsh").openStream())
-                        .useDelimiter("\n");
-        while (scanner.hasNext()) {
-            eventHandler.onNextLine(Paths.get("jeval-startup.jsh"));
-            jshExec.onNext(scanner.next());
-        }
+        var script = Paths.get("jeval-startup.jsh");
+        resourceUtils
+                .readResourceAsList(STARTUP_PATH)
+                .forEach(
+                        line -> {
+                            eventHandler.onNextLine(script);
+                            jshExec.onNext(line);
+                        });
     }
 
     private void defineArgs(JshExecutor jshExec, List<String> args) {
@@ -186,7 +224,6 @@ public class JEval {
 
     public boolean run() throws Exception {
         if (runnable == null) throw new Exception();
-        String classPath = toClasspath(classPathList);
         JShell.Builder jshellBuilder =
                 JShell.builder()
                         .out(out)

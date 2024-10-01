@@ -3,7 +3,7 @@
 # Usage
 
 ```bash
-jeval [ <JAVA_SCRIPT_FILE> | -e <JAVA_CODE_SNIPPET> | -i ] [ARGS]
+jeval [ <JAVA_SCRIPT_FILE> | -e <JAVA_CODE_SNIPPET> | -i | -jshell ] [ARGS]
 ```
 
 Where: 

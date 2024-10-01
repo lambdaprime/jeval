@@ -56,6 +56,9 @@ public class Main {
                     if (arg.equals("-i")) {
                         builder.runInteractive();
                         return true;
+                    } else if (arg.equals("-jshell")) {
+                        builder.runJShellExternal();
+                        return true;
                     }
                     if (builder.hasRunnable()) {
                         // if we set the runnable already we can start

@@ -117,7 +117,7 @@ String[] args = new String[0];
 Optional<Path> scriptPath = Optional.empty();
 
 void printf(String s, String...fmt) {
-    out.print(String.format(s, fmt));
+    out.print(String.format(s, (Object[])fmt));
 }
 
 Stream<String> findMatches(String regexp, String str) {
