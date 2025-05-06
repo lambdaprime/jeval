@@ -1,2 +1,1 @@
-@echo off
-java %JAVA_ARGS% -Xnoclassgc -Xshare:off -noverify -cp "%~dp0\libs\*";"%CLASSPATH%" id.jeval.Main %*
+java --source 17 "%~dp0\jeval" %*
