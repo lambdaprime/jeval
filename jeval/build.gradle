@@ -7,7 +7,7 @@ apply plugin : 'eclipse'
 
 dependencies {
   api "io.github.lambdaprime:id.xfunction:27.0"
-  api "io.github.lambdaprime:depresolve:5.0-SNAPSHOT"
+  api "io.github.lambdaprime:depresolve:5.0"
 
   def resolverVersion = "1.7.2"
   api "org.apache.maven.resolver:maven-resolver:${resolverVersion}"

@@ -42,7 +42,7 @@ mvn clean install -Papp
 
 - Close version in gradle.properties
 - Run `gradle clean build`
-- Update CHANGELOG.md with new release (for changelog generation use `git log --format=%s`)
+- Update [CHANGELOG.md](jeval/release/CHANGELOG.md) with new release (for changelog generation use `git log --format=%s`)
 - Open next SNAPSHOT version
 - Commit changes
 - Push
