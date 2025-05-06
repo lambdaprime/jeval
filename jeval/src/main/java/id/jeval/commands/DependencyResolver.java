@@ -17,12 +17,13 @@
  */
 package id.jeval.commands;
 
-import static id.jeval.commands.CommandConstants.*;
+import static id.jeval.commands.CommandConstants.ADD_DEPENDENCY_COMMAND;
+import static id.jeval.commands.CommandConstants.OPEN_COMMAND;
 import static java.util.stream.Collectors.toList;
 
 import id.depresolve.ArtifactInfo;
+import id.depresolve.Depresolve;
 import id.depresolve.Scope;
-import id.depresolve.app.Depresolve;
 import id.xfunction.function.Unchecked;
 import java.io.File;
 import java.nio.file.Files;
@@ -46,7 +47,8 @@ public class DependencyResolver {
 
     private List<File> resolveInternal(Path scriptPath) throws Exception {
         List<File> output = new ArrayList<>();
-        Depresolve depresolve = new Depresolve().withGenerateClasspath(output);
+        Depresolve depresolve =
+                new Depresolve().withSilentMode().withClasspathConsumer(output::add);
         Iterator<String> iter = Files.lines(scriptPath).iterator();
         while (iter.hasNext()) {
             String line = iter.next();

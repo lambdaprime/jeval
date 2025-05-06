@@ -6,8 +6,8 @@ plugins {
 apply plugin : 'eclipse'
 
 dependencies {
-  api fileTree(include: ['*.jar'], dir: 'libs')
-  api "io.github.lambdaprime:id.xfunction:24.0"
+  api "io.github.lambdaprime:id.xfunction:27.0"
+  api "io.github.lambdaprime:depresolve:5.0-SNAPSHOT"
 
   def resolverVersion = "1.7.2"
   api "org.apache.maven.resolver:maven-resolver:${resolverVersion}"
