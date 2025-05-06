@@ -76,6 +76,10 @@ public class JEval {
         public Builder runSnippet(String snippet) {
             Preconditions.isTrue(
                     !useJShellExternal, "Cannot run snippet when external JShell requested");
+            // in Windows quotes are not striped from the command arguments and are passed as-is to
+            // the application
+            // for this reason we strip them manually
+            snippet = unwrap(snippet, true, "\'\"".toCharArray());
             jeval.runnable = curryAccept(jeval::runSnippet, snippet);
             return this;
         }
@@ -277,5 +281,16 @@ public class JEval {
         // mask backslash so that it can be used as Java string literal
         str = str.replace("\\", "\\\\");
         return XUtils.quote(str);
+    }
+
+    private static String unwrap(String s, boolean trim, char[] symbolsToR) {
+        String st = trim ? s.trim() : s;
+        if (st.isEmpty()) return s;
+        if (st.length() < 2) return s;
+        for (var ch : symbolsToR) {
+            if (st.charAt(0) == ch && st.charAt(st.length() - 1) == ch)
+                return st.substring(1, st.length() - 1);
+        }
+        return s;
     }
 }
