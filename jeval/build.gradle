@@ -43,6 +43,9 @@ task createRelease(type: Zip) {
   archiveFileName = "$releaseFileName"
   destinationDirectory = file("$projectDir/release")
   from file("$packageDir/..")
+  filePermissions {
+    user.execute = true
+  }
 }
 
 task copyLibs(type: Copy) {
