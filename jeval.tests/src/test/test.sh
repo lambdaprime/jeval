@@ -419,7 +419,12 @@ cat << EOF > /tmp/r
 //dependency org.yaml:snakeyaml:1.21
 import org.yaml.snakeyaml.*;
 Yaml yaml = new Yaml();
-String document = "\n- Hesperiidae\n- Papilionidae\n- Apatelodidae\n- Epiplemidae";
+String document = """
+    - Hesperiidae
+    - Papilionidae
+    - Apatelodidae
+    - Epiplemidae
+    """;
 List<String> list = (List<String>) yaml.load(document);
 System.out.println(list);
 EOF
@@ -563,6 +568,17 @@ EXPECTED='{
       {"value": "4", "onclick": "CloseDoc()"}
     ]
 }'
+if [ "$OUT" != "$EXPECTED" ]; then
+    echo "FAILED $OUT"
+    exit 1
+fi
+
+echo "Test 30 Quotes in script arguments"
+cat << EOF > /tmp/l
+out.println(args[0]);
+EOF
+OUT=$(jeval /tmp/l 'This "word" is in quotes')
+EXPECTED="This \"word\" is in quotes"
 if [ "$OUT" != "$EXPECTED" ]; then
     echo "FAILED $OUT"
     exit 1

@@ -278,8 +278,7 @@ public class JEval {
     }
 
     private static String asStringLiteral(String str) {
-        // mask backslash so that it can be used as Java string literal
-        str = str.replace("\\", "\\\\");
+        str = str.replace("\\", "\\\\").replace("\"", "\\\"");
         return XUtils.quote(str);
     }
 
